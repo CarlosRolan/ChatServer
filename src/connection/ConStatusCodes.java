@@ -7,4 +7,6 @@ public interface ConStatusCodes {
 
     final String SUCCESS_SHOW_CREDENTIALS = "ONLINE";
     final String ERROR_CHANNEL_INIT = "Error initializing the conection with the client";
+
+    final String CONNECTION_CLOSED = "CONNECTION CLOSED";
 }

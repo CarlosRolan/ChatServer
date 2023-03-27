@@ -40,7 +40,9 @@ public class Server implements Enviroment {
 		}
 	}
 
-	public ArrayList<ClientChannel> getChannels() {
+
+
+	public ArrayList<ClientChannel> getOnlineChannels() {
 		return this.allChannels;
 	}
 	public void registerConnection(ClientChannel c) {

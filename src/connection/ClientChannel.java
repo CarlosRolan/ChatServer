@@ -18,6 +18,10 @@ public class ClientChannel extends Thread implements ConStatusCodes {
 	private BufferedReader br;
 	private BufferedWriter bw;
 
+	private boolean chatting = false;
+
+	ClientChannel chattingWith = null;
+
 	public String getNick() {
 		return this.nick;
 	}
@@ -57,12 +61,13 @@ public class ClientChannel extends Thread implements ConStatusCodes {
 		return clientNick;
 	}
 
-	private String readClient() throws IOException {
-		return this.br.readLine();
+	public String readClient() throws IOException {
+		String lineIn = br.readLine();
+		return lineIn;
 	}
 
 	public void writeClient(String msgToClient) throws IOException {
-		System.out.println(msgToClient + "-->[" + this.nick + "]");
+		System.out.println(msgToClient + "-->[" + nick + "]");
 		this.bw.write(msgToClient);
 		this.bw.newLine();
 		this.bw.flush();
@@ -75,36 +80,28 @@ public class ClientChannel extends Thread implements ConStatusCodes {
 			try {
 				lineIn = readClient();
 				// Thread.sleep(1500);
-				System.out.println("[" + this.nick + "]-->" + lineIn);
-			} catch (IOException e) {
+				if (chatting) {
+					System.out.println("FROM " + nick + "TO " + chattingWith.nick + " msg:" + lineIn);
+					chattingWith.writeClient(lineIn);
+				} else {
+					if (lineIn.startsWith(Request.NEW_CHAT)) {
+						chatting = true;
+						lineIn = lineIn.replace(Request.NEW_CHAT, "");
+
+						chattingWith = Router.getClient(lineIn);
+						System.out.println("CONNECTE WITH " + chattingWith.getNick());
+	
+					} else if (lineIn.equals(Request.SHOW_ONLINE)) {
+						writeClient(Request.showOnlineUsers());
+					}else {
+						System.out.println("[" + nick + "]-->" + lineIn);
+					}
+				}
+			} catch (IOException | NullPointerException e) {
 				System.out.println(
-						"CONNECTION WITH [" + this.nick + "]" + "CLOSED");
+						CONNECTION_CLOSED + " [" + nick + "]" + "CLOSED");
 				Server.getInstance().deleteConnection(this);
 				break;
-			}
-
-			switch (lineIn) {
-				case Request.SHOW_ONLINE:
-					try {
-						writeClient(Request.showOnlineUsers(this));
-					} catch (IOException e) {
-
-						e.printStackTrace();
-					}
-					break;
-
-				case Request.NEW_CHAT:
-					try {
-						writeClient("Select user you wish to chat with");
-						String nick = readClient();
-						writeClient("Send msg to [" + nick +"]");
-						String msg = readClient();
-						Router.sendMsgto(nick, msg);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					
-					break;
 			}
 		}
 
