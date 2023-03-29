@@ -75,28 +75,26 @@ public class ClientChannel extends Thread implements ConStatusCodes {
 
 	@Override
 	public void run() {
+
 		while (true) {
 			String lineIn = "lineIn empty";
+
 			try {
 				lineIn = readClient();
-				// Thread.sleep(1500);
-				if (chatting) {
-					System.out.println("FROM " + nick + "TO " + chattingWith.nick + " msg:" + lineIn);
-					chattingWith.writeClient(lineIn);
-				} else {
-					if (lineIn.startsWith(Request.NEW_CHAT)) {
-						chatting = true;
-						lineIn = lineIn.replace(Request.NEW_CHAT, "");
-
-						chattingWith = Router.getClient(lineIn);
-						System.out.println("CONNECTE WITH " + chattingWith.getNick());
-	
-					} else if (lineIn.equals(Request.SHOW_ONLINE)) {
+				switch (lineIn) {
+					case Request.SHOW_ONLINE:
 						writeClient(Request.showOnlineUsers());
-					}else {
+						break;
+					case Request.NEW_CHAT:
+						writeClient(Request.ASK_PERMISSION);
+						break;
+					case Request.ASK_PERMISSION:
+						break;
+					default:
 						System.out.println("[" + nick + "]-->" + lineIn);
-					}
+						break;
 				}
+ 
 			} catch (IOException | NullPointerException e) {
 				System.out.println(
 						CONNECTION_CLOSED + " [" + nick + "]" + "CLOSED");
