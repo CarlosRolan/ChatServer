@@ -1,4 +1,4 @@
-package chat;
+package chats;
 
 import java.io.IOException;
 
@@ -10,9 +10,4 @@ public class Chat {
     ClientChannel cEmisor;
     ClientChannel cReceptor;
 
-
-
-
-
-    
 }

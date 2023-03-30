@@ -1,8 +1,6 @@
 package controller;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -20,13 +18,13 @@ public class Server implements Enviroment {
 		return instance;
 	}
 
-	private ArrayList<ClientChannel> allChannels;
+	private ArrayList<ClientChannel> allOnlineUsers;
 	private ServerSocket serverSocket;
 	// Constructor
 	private Server() {
 		try {
 			this.serverSocket = new ServerSocket(PORT);
-			this.allChannels = new ArrayList<>();
+			this.allOnlineUsers = new ArrayList<>();
 		} catch (IOException e) {
 		}
 	}
@@ -40,16 +38,21 @@ public class Server implements Enviroment {
 		}
 	}
 
-
-
 	public ArrayList<ClientChannel> getOnlineChannels() {
-		return this.allChannels;
+		return this.allOnlineUsers;
 	}
+
+	public ClientChannel getOnlineUser(String nick) {
+		for (ClientChannel iter : allOnlineUsers) {
+			if (iter.getNick().equals(nick))
+			return iter;
+		} return null;
+	} 
 	public void registerConnection(ClientChannel c) {
-		this.allChannels.add(c);
+		this.allOnlineUsers.add(c);
 	}
 	public void deleteConnection(ClientChannel c) {
-		this.allChannels.remove(c);
+		this.allOnlineUsers.remove(c);
 	}
 
 

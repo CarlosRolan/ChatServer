@@ -2,11 +2,18 @@ package connection;
 
 public interface ConStatusCodes {
 
-    final String COMFRIMATION_SUCCESS = "OK";
-    // private static final String CONECTION_REJECTED = "OK";
-
-    final String SUCCESS_SHOW_CREDENTIALS = "ONLINE";
-    final String ERROR_CHANNEL_INIT = "Error initializing the conection with the client";
-
+    final String CONNECTION_ESTABLISH = "CONNECTION_ESTABLISH";
     final String CONNECTION_CLOSED = "CONNECTION CLOSED";
+
+    final String PRESENTATION_SUCCES = "PRESENTATION_SUCCES";
+    final String PRESENTATION_FAIL = "PRESENTATION_FAIL";
+
+    final String ONLINE = "ONLINE";
+    final String OFFLINE = "OFFLINE";
+    
+
+
+
+
+
 }

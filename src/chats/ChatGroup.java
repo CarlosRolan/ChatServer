@@ -1,4 +1,4 @@
-package chat;
+package chats;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,15 +22,8 @@ public class ChatGroup {
     }
 
     public void send(String msg) {
-        for (ClientChannel iterable : this.members) {
-            try {
-                iterable.writeClient(msg);
-            } catch (IOException e) {
-                System.out.println(
-                        "Could not send msg to chat member [" + iterable.getId() + "] (" + iterable.getNick() + ")");
-            }
-
-        }
+  
+        
     }
 
 }
