@@ -38,9 +38,7 @@ public class ClientChannel extends Thread implements ConStatusCodes {
 
 			} catch (IOException e) {
 				e.printStackTrace();
-			} finally {
-				
-			}
+			} 
 			
 	}
 
