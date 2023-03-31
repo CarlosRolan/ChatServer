@@ -42,12 +42,25 @@ public class Server implements Enviroment {
 		return this.allOnlineUsers;
 	}
 
-	public ClientChannel getOnlineUser(String nick) {
-		for (ClientChannel iter : allOnlineUsers) {
-			if (iter.getNick().equals(nick))
-			return iter;
-		} return null;
-	} 
+	public ClientChannel getOnlineUserByID(String userID) {
+		long parsedUserID = Long.parseLong(userID);
+		System.out.println(parsedUserID + " parsed ID value");
+		for (ClientChannel iterable : allOnlineUsers) {
+			if (iterable.getId() == parsedUserID) {
+				return iterable;
+			}
+		}
+		return null;
+	}
+
+	public ClientChannel getOnlineUserByNick(String userNick) {
+		for (ClientChannel iterable : allOnlineUsers) {
+			if (iterable.getNick().equals(userNick)) {
+				return iterable;
+			}
+		}
+		return null;
+	}
 	public void registerConnection(ClientChannel c) {
 		this.allOnlineUsers.add(c);
 	}

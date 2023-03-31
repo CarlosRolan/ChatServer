@@ -38,6 +38,12 @@ public class Message implements Serializable {
         pText = text;
     }
 
+    public Message(String action, String emisor, String receptor) {
+        pAction = action;
+        pEmisor = emisor;
+        pReceptor = receptor;
+    }
+
     public Message(String action, String emisor) {
         pAction = action;
         pEmisor = emisor;
@@ -49,7 +55,11 @@ public class Message implements Serializable {
 
     @Override
     public String toString() {
-        return "MSG[-\n\tAction{"+pAction+"}\n\t"+"Emisor{"+pEmisor+"}\n\t"+"Receptor{"+pReceptor+"}\n\t"+"Text{"+pText+"}\n]";
+        return "MSG[\n\tAction{"+pAction+"}\n\t"+"Emisor{"+pEmisor+"}\n\t"+"Receptor{"+pReceptor+"}\n\t"+"Text{"+pText+"}\n]";
+    }
+
+    public String requestInfo() {
+        return "___"+pAction+"____\t" + ":" + "[" + pEmisor + "]"+ "=>"+"[" + pReceptor +"]";
     }
     
     
