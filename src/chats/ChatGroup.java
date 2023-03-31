@@ -1,6 +1,5 @@
 package chats;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import connection.ClientChannel;

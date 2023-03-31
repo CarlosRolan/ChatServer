@@ -7,56 +7,67 @@ public class Request implements ConStatusCodes {
 
     public static final String PRESENTATION = "PRESENTATION";
     public static final String SHOW_ALL_ONLINE = "SHOW_ALL_ONLINE";
+
     public static final String CHAT_REQUESTED = "CHAT_REQUESTED";
-
     public static final String START_CHAT = "START_CHAT";
-
     public static final String ACCEPT_CHAT = "ACCEPT_CHAT";
-    public  static final String REJECT_CHAT = "REJECT_CHAT";
-    
+    public static final String REJECT_CHAT = "REJECT_CHAT";
+    public static final String TO_CHAT = "TO_CHAT";
+
     public final static String SELECT_USER_BY_ID = "Select an ID of the user you want to chat with";
     public final static String SELECT_USER_BY_NICKNAME = "Select an NICK of the user you want to chat with";
 
-    public String showOnlineUsers() {
+    public void showOnlineUsers(ClientChannel requester) {
         String nickNames = "";
         for (int i = 0; i < Server.getInstance().getOnlineChannels().size(); i++) {
             ClientChannel current = Server.getInstance().getOnlineChannels().get(i);
             nickNames += current.getId() + current.getNick() + ",";
         }
-        return nickNames;
+        System.out.println("__RESULT__[" + nickNames + "] ==> " + requester.getNick());
     }
 
-    public void requestChatting(ClientChannel emisor, ClientChannel receptor) {
+    public void requestChatting(ClientChannel requester, ClientChannel receptor) {
 
-        //If we found it (not null) and is not trying to establish a chat with itself we request chatting	
+        // If we found it (not null) and is not trying to establish a chat with itself
+        // we request chatting
         if (receptor == null) {
             System.out.println(CLIENT_NOT_FOUND);
-            emisor.writeClientMessage(new Message(CLIENT_NOT_FOUND));
-            //Is trying to talk with hiimself
+            requester.writeClientMessage(new Message(CLIENT_NOT_FOUND));
+            // Is trying to talk with hiimself
 
-        } else if (emisor.getNick().equals(receptor.getNick()) | emisor.getId() == receptor.getId()) {
+        } else if (requester.getNick().equals(receptor.getNick()) | requester.getId() == receptor.getId()) {
             System.out.println(SELF_REFERENCE);
-            emisor.writeClientMessage(new Message(SELF_REFERENCE));
+            requester.writeClientMessage(new Message(SELF_REFERENCE));
         }
-            
+
         // To de emirsor
-        Message waitingMsg = new Message(WAITING_FOR_PERMISSION, receptor.getNick(), emisor.getNick());
+        Message waitingMsg = new Message(WAITING_FOR_PERMISSION, receptor.getNick(), requester.getNick());
         System.out.println(waitingMsg);
-        emisor.writeClientMessage(waitingMsg);
+        requester.writeClientMessage(waitingMsg);
         // To the receptor
-        Message permitChat = new Message(ASKING_PERMISSION, emisor.getNick(), receptor.getNick());
+        Message permitChat = new Message(ASKING_PERMISSION, requester.getNick(), receptor.getNick());
         System.out.println(permitChat);
         receptor.writeClientMessage(permitChat);
     }
 
-    public void startChat(ClientChannel emisor, ClientChannel receptor) {
+    public void startChat(ClientChannel requester, ClientChannel receptor) {
 
-        emisor.writeClientMessage(new Message( "\t~~~~~CHAT"+ receptor.getNick() +"~~~~~~"));
-                     
+        Message chatStartedForRequester = new Message(START_CHAT, "SERVER", receptor.getNick());
+        Message chatStartedForASked = new Message(START_CHAT, "SERVER", requester.getNick());
+
+        requester.writeClientMessage(chatStartedForRequester);
+        requester.setChatting(true);
+        receptor.writeClientMessage(chatStartedForASked);
+        receptor.setChatting(true);
+
     }
 
     public void rejectChat(Message msg) {
-    
+
+    }
+
+    public void sendToChat(Message msgToCHat) {
+        
     }
 
 }

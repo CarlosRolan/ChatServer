@@ -10,150 +10,149 @@ import controller.Request;
 
 public class ClientChannel extends Thread implements ConStatusCodes {
 
-	private Socket pSocket = null;
-	private String nick;
+    private Socket pSocket = null;
+    private String nick;
 
-	private ObjectInputStream ois;
-	private ObjectOutputStream oos;
+    private ObjectInputStream ois;
+    private ObjectOutputStream oos;
 
-	public String getNick() {
-		return nick;
-	}
+    private boolean chatting = false;
 
-	public ObjectInputStream getOis() {
-		return ois;
-	}
+    public boolean isChatting()  {
+        return chatting;
+    }
 
-	public ObjectOutputStream getOos() {
-		return oos;
-	}
+    public void setChatting(boolean stateChatting) {
+        chatting = stateChatting;
+    }
 
-	public void setOis(ObjectInputStream newOis) {
-		ois = newOis;
-	}
+    public String getNick() {
+        return nick;
+    }
 
-	public void SetOos(ObjectOutputStream newOos) {
-		oos = newOos;
-	}
+    public ObjectInputStream getOis() {
+        return ois;
+    }
 
-	// Constructor
-	public ClientChannel(Socket socket) {
+    public ObjectOutputStream getOos() {
+        return oos;
+    }
 
-		pSocket = socket;
+    public void setOis(ObjectInputStream newOis) {
+        ois = newOis;
+    }
 
-		try {
-			oos = new ObjectOutputStream(pSocket.getOutputStream());
-			ois = new ObjectInputStream(pSocket.getInputStream());
+    public void SetOos(ObjectOutputStream newOos) {
+        oos = newOos;
+    }
 
-			if (presenting()) {
-				sendComfirmation();
-			} else {
+    // Constructor
+    public ClientChannel(Socket socket) {
 
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+        pSocket = socket;
 
-	}
+        try {
+            oos = new ObjectOutputStream(pSocket.getOutputStream());
+            ois = new ObjectInputStream(pSocket.getInputStream());
 
-	private boolean presenting() {
-		Message presentation = readClientMessage();
-		System.out.println(presentation.requestInfo());
-		if (presentation.getAction().equals(Request.PRESENTATION)) {
-			nick = presentation.getEmisor();
-			return true;
-		} else {
-			return false;
-		}
-	}
+            if (presenting()) {
+                sendComfirmation();
+            } else {
 
-	private void sendComfirmation() {
-		Message comfirmation = new Message(PRESENTATION_SUCCES, "SERVER", nick);
-		writeClientMessage(comfirmation);
-		System.out.println(comfirmation.requestInfo());
-	}
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-	public void writeClientMessage(Message msg) {
-		try {
-			oos.writeObject(msg);
-			oos.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    }
 
-	private void sendReqResponse(String reqResult) {
-		Message msg = new Message(Request.SHOW_ALL_ONLINE, "SERVER", nick, reqResult);
-		System.out.println("__RESULT__[" + reqResult + "] ==> " + nick);
-		try {
-			oos.writeObject(msg);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    private boolean presenting() {
+        Message presentation = readClientMessage();
+        System.out.println(presentation.requestInfo());
+        if (presentation.getAction().equals(Request.PRESENTATION)) {
+            nick = presentation.getEmisor();
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-	public Message readClientMessage() {
-		try {
-			return (Message) ois.readObject();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-			return null;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
+    private void sendComfirmation() {
+        Message comfirmation = new Message(PRESENTATION_SUCCES, "SERVER", nick);
+        writeClientMessage(comfirmation);
+        System.out.println(comfirmation.requestInfo());
+    }
 
-	public void handleRequest(Message msg) {
+    public void writeClientMessage(Message msg) {
+        try {
+            oos.writeObject(msg);
+            oos.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-		switch (msg.getAction()) {
-			case Request.SHOW_ALL_ONLINE:
-				sendReqResponse(new Request().showOnlineUsers());
-				break;
+    public Message readClientMessage() {
+        try {
+            return (Message) ois.readObject();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
-				//REQUEST CHAT AS A EMISOR
-			case Request.CHAT_REQUESTED:
-				ClientChannel receptor = null;
-				//We find the picked user by the requester=emisor
-				if (msg.getText().equals(Request.SELECT_USER_BY_NICKNAME)) {
-					receptor = Server.getInstance().getOnlineUserByNick(msg.getReceptor());
-				} else if (msg.getText().equals(Request.SELECT_USER_BY_ID)) {
-					receptor = Server.getInstance().getOnlineUserByID(msg.getReceptor());
-				}
+    public void handleRequest(Message msg) {
 
-				new Request().requestChatting(this, receptor);
-				
-				break;
+        switch (msg.getAction()) {
+            case Request.SHOW_ALL_ONLINE:
+                new Request().showOnlineUsers(this);
+                break;
 
-				//REQUEST CHAT AS A RECEPTOR
-			case Request.ACCEPT_CHAT: 
-			ClientChannel requester = Server.getInstance().getOnlineUserByNick(msg.getReceptor());
-			System.out.println(nick + " accepted. Startting chat with " + requester.getNick());
-			new Request().startChat(this, requester);
-				break;
+            // REQUEST CHAT AS A EMISOR
+            case Request.CHAT_REQUESTED:
+                ClientChannel receptor = null;
+                // We find the picked user by the requester=emisor
+                if (msg.getText().equals(Request.SELECT_USER_BY_NICKNAME)) {
+                    receptor = Server.getInstance().getOnlineUserByNick(msg.getReceptor());
+                } else if (msg.getText().equals(Request.SELECT_USER_BY_ID)) {
+                    receptor = Server.getInstance().getOnlineUserByID(msg.getReceptor());
+                }
 
-			case Request.REJECT_CHAT:
-				new Request().rejectChat(msg);
-			break;
+                new Request().requestChatting(this, receptor);
 
-		}
-	}
+                break;
 
+            // REQUEST CHAT AS A RECEPTOR = EMISOR
+            case Request.ACCEPT_CHAT:
+                ClientChannel clientComfirm = Server.getInstance().getOnlineUserByNick(msg.getReceptor());
+                System.out.println(nick + " accepted. Startting chat with " + clientComfirm.nick);
+                new Request().startChat(this, clientComfirm);
+                break;
 
-	@Override
-	public void run() {
-		while (true) {
-			Message msg = readClientMessage();
-			System.out.println(msg.toString());
-			try {
-				handleRequest(msg);
-			} catch (NullPointerException e) {
-				System.out.println(
-						CONNECTION_CLOSED + " [" + nick + "]");
-				Server.getInstance().deleteConnection(this);
-				break;
-			}
-		}
+            case Request.REJECT_CHAT:
+                new Request().rejectChat(msg);
+                break;
 
-	}
+        }
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            Message msg = readClientMessage();
+            System.out.println(msg.toString());
+            try {
+                handleRequest(msg);
+            } catch (NullPointerException e) {
+                System.out.println(
+                        CONNECTION_CLOSED + " [" + nick + "]");
+                Server.getInstance().deleteConnection(this);
+                break;
+            }
+        }
+
+    }
 }
