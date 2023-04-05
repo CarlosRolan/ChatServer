@@ -24,6 +24,7 @@ public class Request implements ConStatusCodes {
             nickNames += current.getId() + current.getNick() + ",";
         }
         System.out.println("__RESULT__[" + nickNames + "] ==> " + requester.getNick());
+        requester.writeClientMessage(new Message(SHOW_ALL_ONLINE, "SERVER", requester.getNick(), nickNames));
     }
 
     public void requestChatting(ClientChannel requester, ClientChannel receptor) {
@@ -62,12 +63,13 @@ public class Request implements ConStatusCodes {
 
     }
 
-    public void rejectChat(Message msg) {
-
+    public void rejectChat(ClientChannel requester, ClientChannel receptor) {
+        Message msgForRequester = new Message(REJECT_CHAT, receptor.getNick(), requester.getNick(), receptor.getNick() + " no quiere chatear contigo");
+        requester.writeClientMessage(msgForRequester);
     }
 
     public void sendToChat(Message msgToCHat) {
-        
+
     }
 
 }
