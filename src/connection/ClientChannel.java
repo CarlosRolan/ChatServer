@@ -133,7 +133,6 @@ public class ClientChannel extends Thread implements ConStatusCodes {
                 break;
 
             case Request.REJECT_CHAT:
-                new Request().rejectChat(msg);
                 break;
 
         }
