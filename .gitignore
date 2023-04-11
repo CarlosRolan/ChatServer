@@ -13,3 +13,4 @@ bin/controller/Server.class
 bin/controller/Request.class
 .classpath
 .project
+.editorconfig
