@@ -12,4 +12,4 @@ bin/controller/package-info.class
 bin/controller/Server.class
 bin/controller/Request.class
 .classpath
-.proyect
+.project
