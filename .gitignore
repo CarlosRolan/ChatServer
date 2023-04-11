@@ -10,3 +10,6 @@ bin/controller/Enviroment.class
 bin/controller/Message.class
 bin/controller/package-info.class
 bin/controller/Server.class
+.classpath
+.editorconfig
+.project
