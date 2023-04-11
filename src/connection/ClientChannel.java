@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+
+import chats.Chat;
 import controller.Server;
 import controller.Message;
 import controller.Request;
@@ -18,7 +20,7 @@ public class ClientChannel extends Thread implements ConStatusCodes {
 
     private boolean chatting = false;
 
-    public boolean isChatting()  {
+    public boolean isChatting() {
         return chatting;
     }
 
@@ -133,9 +135,14 @@ public class ClientChannel extends Thread implements ConStatusCodes {
                 break;
 
             case Request.REJECT_CHAT:
-                new Request().rejectChat(msg);
+                // new Request().rejectChat(msg);
                 break;
 
+            case Request.TO_CHAT:
+            System.out.println(msg.toString());
+                ClientChannel receiver = Server.getInstance().getOnlineUserByNick(msg.getReceptor());
+                new Request().sendDirectMessage(nick, receiver, ASKING_PERMISSION);
+                break;
         }
     }
 

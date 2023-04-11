@@ -1,5 +1,6 @@
 package controller;
 
+import chats.Chat;
 import connection.ClientChannel;
 import connection.ConStatusCodes;
 
@@ -39,22 +40,22 @@ public class Request implements ConStatusCodes {
         } else if (requester.getNick().equals(receptor.getNick()) | requester.getId() == receptor.getId()) {
             System.out.println(SELF_REFERENCE);
             requester.writeClientMessage(new Message(SELF_REFERENCE));
+        } else {
+            // To de emirsor
+            Message waitingMsg = new Message(WAITING_FOR_PERMISSION, receptor.getNick(), requester.getNick());
+            System.out.println(waitingMsg);
+            requester.writeClientMessage(waitingMsg);
+            // To the receptor
+            Message permitChat = new Message(ASKING_PERMISSION, requester.getNick(), receptor.getNick());
+            System.out.println(permitChat);
+            receptor.writeClientMessage(permitChat);
         }
-
-        // To de emirsor
-        Message waitingMsg = new Message(WAITING_FOR_PERMISSION, receptor.getNick(), requester.getNick());
-        System.out.println(waitingMsg);
-        requester.writeClientMessage(waitingMsg);
-        // To the receptor
-        Message permitChat = new Message(ASKING_PERMISSION, requester.getNick(), receptor.getNick());
-        System.out.println(permitChat);
-        receptor.writeClientMessage(permitChat);
     }
 
     public void startChat(ClientChannel requester, ClientChannel receptor) {
 
-        Message chatStartedForRequester = new Message(START_CHAT, "SERVER", receptor.getNick());
-        Message chatStartedForASked = new Message(START_CHAT, "SERVER", requester.getNick());
+        Message chatStartedForRequester = new Message(START_CHAT, "SERVER", requester.getNick());
+        Message chatStartedForASked = new Message(START_CHAT, "SERVER", receptor.getNick());
 
         requester.writeClientMessage(chatStartedForRequester);
         requester.setChatting(true);
@@ -64,12 +65,17 @@ public class Request implements ConStatusCodes {
     }
 
     public void rejectChat(ClientChannel requester, ClientChannel receptor) {
-        Message msgForRequester = new Message(REJECT_CHAT, receptor.getNick(), requester.getNick(), receptor.getNick() + " no quiere chatear contigo");
+        Message msgForRequester = new Message(REJECT_CHAT, receptor.getNick(), requester.getNick(),
+                receptor.getNick() + " no quiere chatear contigo");
         requester.writeClientMessage(msgForRequester);
     }
 
-    public void sendToChat(Message msgToCHat) {
+    public void sendMsgToChat(Chat chat, ClientChannel sender, String textMsg) {
+        
+    }
 
+    public void sendDirectMessage(String emisorNick, ClientChannel receptor, String textMsg) {
+        receptor.writeClientMessage(new Message(TO_CHAT, emisorNick, receptor.getNick(), textMsg));
     }
 
 }
