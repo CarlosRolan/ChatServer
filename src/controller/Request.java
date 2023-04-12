@@ -57,6 +57,10 @@ public class Request implements ConStatusCodes {
         Message chatStartedForRequester = new Message(START_CHAT, "SERVER", requester.getNick());
         Message chatStartedForASked = new Message(START_CHAT, "SERVER", receptor.getNick());
 
+        System.out.println("========COMFIRMATION MSGS====");
+        System.out.println(chatStartedForRequester);
+        System.out.println(chatStartedForASked);
+
         requester.writeClientMessage(chatStartedForRequester);
         requester.setChatting(true);
         receptor.writeClientMessage(chatStartedForASked);
