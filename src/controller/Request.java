@@ -2,9 +2,10 @@ package controller;
 
 import chats.Chat;
 import connection.ClientChannel;
-import connection.ConStatusCodes;
+import connection.ClientStatusCodes;
 
-public class Request implements ConStatusCodes {
+
+public class Request implements ClientStatusCodes {
 
     public static final String PRESENTATION = "PRESENTATION";
     public static final String SHOW_ALL_ONLINE = "SHOW_ALL_ONLINE";
@@ -46,7 +47,7 @@ public class Request implements ConStatusCodes {
             System.out.println(waitingMsg);
             requester.writeClientMessage(waitingMsg);
             // To the receptor
-            Message permitChat = new Message(ASKING_PERMISSION, requester.getNick(), receptor.getNick());
+            Message permitChat = new Message(ASKED_FOR_PERMISSION, requester.getNick(), receptor.getNick());
             System.out.println(permitChat);
             receptor.writeClientMessage(permitChat);
         }
@@ -79,7 +80,7 @@ public class Request implements ConStatusCodes {
     }
 
     public void sendDirectMessage(String emisorNick, ClientChannel receptor, String textMsg) {
-        receptor.writeClientMessage(new Message(TO_CHAT, emisorNick, receptor.getNick(), textMsg));
+        receptor.writeClientMessage(new Message(TO_CHAT, emisorNick,receptor.getNick(), textMsg));
     }
 
 }

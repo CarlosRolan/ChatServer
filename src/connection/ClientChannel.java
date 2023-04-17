@@ -10,7 +10,7 @@ import controller.Server;
 import controller.Message;
 import controller.Request;
 
-public class ClientChannel extends Thread implements ConStatusCodes {
+public class ClientChannel extends Thread implements ClientStatusCodes {
 
     private Socket pSocket = null;
     private String nick;
@@ -141,7 +141,7 @@ public class ClientChannel extends Thread implements ConStatusCodes {
             case Request.TO_CHAT:
             System.out.println(msg.toString());
                 ClientChannel receiver = Server.getInstance().getOnlineUserByNick(msg.getReceptor());
-                new Request().sendDirectMessage(nick, receiver, ASKING_PERMISSION);
+                new Request().sendDirectMessage(nick, receiver, msg.getText());
                 break;
         }
     }

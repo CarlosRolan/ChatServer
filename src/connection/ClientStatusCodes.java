@@ -1,13 +1,13 @@
 package connection;
 
-public interface ConStatusCodes {
+public interface ClientStatusCodes {
 
     final String CONNECTION_ESTABLISH = "CONNECTION_ESTABLISH";
     final String CONNECTION_CLOSED = "CONNECTION CLOSED";
 
     final String PRESENTATION_SUCCES = "PRESENTATION_SUCCES";
 
-    final String ASKING_PERMISSION = "ASKING_PERMISSION";
+    final String ASKED_FOR_PERMISSION = "ASKED_FOR_PERMISSION";
     final String WAITING_FOR_PERMISSION = "WAITING_FOR_PERMISSION";
 
     final String START_CHAT = "START_CHAT";
