@@ -1,25 +1,23 @@
 package controller;
 
-import chats.Chat;
 import connection.ClientChannel;
 import connection.ClientStatusCodes;
 
+public interface RequestAPI implements ClientStatusCodes {
 
-public class Request implements ClientStatusCodes {
+    final String PRESENTATION = "PRESENTATION";
+    final String SHOW_ALL_ONLINE = "SHOW_ALL_ONLINE";
+    final String CHAT_REQUESTED = "CHAT_REQUESTED";
+    final String START_CHAT = "START_CHAT";
+    final String ACCEPT_CHAT = "ACCEPT_CHAT";
+    final String REJECT_CHAT = "REJECT_CHAT";
+    final String TO_CHAT = "TO_CHAT";
 
-    public static final String PRESENTATION = "PRESENTATION";
-    public static final String SHOW_ALL_ONLINE = "SHOW_ALL_ONLINE";
+    final String SELECT_USER_BY_ID = "Select an ID of the user you want to chat with";
+    final String SELECT_USER_BY_NICKNAME = "Select an NICK of the user you want to chat with";
 
-    public static final String CHAT_REQUESTED = "CHAT_REQUESTED";
-    public static final String START_CHAT = "START_CHAT";
-    public static final String ACCEPT_CHAT = "ACCEPT_CHAT";
-    public static final String REJECT_CHAT = "REJECT_CHAT";
-    public static final String TO_CHAT = "TO_CHAT";
 
-    public final static String SELECT_USER_BY_ID = "Select an ID of the user you want to chat with";
-    public final static String SELECT_USER_BY_NICKNAME = "Select an NICK of the user you want to chat with";
-
-    public void showOnlineUsers(ClientChannel requester) {
+    default public void showOnlineUsers(ClientChannel requester) {
         String nickNames = "";
         for (int i = 0; i < Server.getInstance().getOnlineChannels().size(); i++) {
             ClientChannel current = Server.getInstance().getOnlineChannels().get(i);
@@ -29,7 +27,8 @@ public class Request implements ClientStatusCodes {
         requester.writeClientMessage(new Message(SHOW_ALL_ONLINE, "SERVER", requester.getNick(), nickNames));
     }
 
-    public void requestChatting(ClientChannel requester, ClientChannel receptor) {
+    
+    default public void requestChatting(ClientChannel requester, ClientChannel receptor) {
 
         // If we found it (not null) and is not trying to establish a chat with itself
         // we request chatting
@@ -53,7 +52,7 @@ public class Request implements ClientStatusCodes {
         }
     }
 
-    public void startChat(ClientChannel requester, ClientChannel receptor) {
+    default public void startChat(ClientChannel requester, ClientChannel receptor) {
 
         Message chatStartedForRequester = new Message(START_CHAT, "SERVER", requester.getNick());
         Message chatStartedForASked = new Message(START_CHAT, "SERVER", receptor.getNick());
@@ -69,17 +68,13 @@ public class Request implements ClientStatusCodes {
 
     }
 
-    public void rejectChat(ClientChannel requester, ClientChannel receptor) {
+    default public void rejectChat(ClientChannel requester, ClientChannel receptor) {
         Message msgForRequester = new Message(REJECT_CHAT, receptor.getNick(), requester.getNick(),
                 receptor.getNick() + " no quiere chatear contigo");
         requester.writeClientMessage(msgForRequester);
     }
 
-    public void sendMsgToChat(Chat chat, ClientChannel sender, String textMsg) {
-        
-    }
-
-    public void sendDirectMessage(String emisorNick, ClientChannel receptor, String textMsg) {
+    default public void sendDirectMessage(String emisorNick, ClientChannel receptor, String textMsg) {
         receptor.writeClientMessage(new Message(TO_CHAT, emisorNick,receptor.getNick(), textMsg));
     }
 

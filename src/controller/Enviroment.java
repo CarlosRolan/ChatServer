@@ -2,7 +2,7 @@ package controller;
 
 public interface Enviroment {
 
-	int PORT = 8899;
-	public final static String HOSTNAME = "localhost";
+	final int PORT = 8899;
+	final String HOSTNAME = "localhost";
 
 }

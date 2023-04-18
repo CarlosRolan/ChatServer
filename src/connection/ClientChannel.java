@@ -4,11 +4,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-
-import chats.Chat;
 import controller.Server;
 import controller.Message;
-import controller.Request;
+import controller.RequestAPI;
 
 public class ClientChannel extends Thread implements ClientStatusCodes {
 
@@ -71,7 +69,7 @@ public class ClientChannel extends Thread implements ClientStatusCodes {
     private boolean presenting() {
         Message presentation = readClientMessage();
         System.out.println(presentation.requestInfo());
-        if (presentation.getAction().equals(Request.PRESENTATION)) {
+        if (presentation.getAction().equals(RequestAPI.PRESENTATION)) {
             nick = presentation.getEmisor();
             return true;
         } else {
@@ -109,39 +107,39 @@ public class ClientChannel extends Thread implements ClientStatusCodes {
     public void handleRequest(Message msg) {
 
         switch (msg.getAction()) {
-            case Request.SHOW_ALL_ONLINE:
-                new Request().showOnlineUsers(this);
+            case RequestAPI.SHOW_ALL_ONLINE:
+                new RequestAPI().showOnlineUsers(this);
                 break;
 
             // REQUEST CHAT AS A EMISOR
-            case Request.CHAT_REQUESTED:
+            case RequestAPI.CHAT_REQUESTED:
                 ClientChannel receptor = null;
                 // We find the picked user by the requester=emisor
-                if (msg.getText().equals(Request.SELECT_USER_BY_NICKNAME)) {
+                if (msg.getText().equals(RequestAPI.SELECT_USER_BY_NICKNAME)) {
                     receptor = Server.getInstance().getOnlineUserByNick(msg.getReceptor());
-                } else if (msg.getText().equals(Request.SELECT_USER_BY_ID)) {
+                } else if (msg.getText().equals(RequestAPI.SELECT_USER_BY_ID)) {
                     receptor = Server.getInstance().getOnlineUserByID(msg.getReceptor());
                 }
 
-                new Request().requestChatting(this, receptor);
+                new RequestAPI().requestChatting(this, receptor);
 
                 break;
 
             // REQUEST CHAT AS A RECEPTOR = EMISOR
-            case Request.ACCEPT_CHAT:
+            case RequestAPI.ACCEPT_CHAT:
                 ClientChannel clientComfirm = Server.getInstance().getOnlineUserByNick(msg.getReceptor());
                 System.out.println(nick + " accepted. Startting chat with " + clientComfirm.nick);
-                new Request().startChat(this, clientComfirm);
+                new RequestAPI().startChat(this, clientComfirm);
                 break;
 
-            case Request.REJECT_CHAT:
+            case RequestAPI.REJECT_CHAT:
                 // new Request().rejectChat(msg);
                 break;
 
-            case Request.TO_CHAT:
+            case RequestAPI.TO_CHAT:
             System.out.println(msg.toString());
                 ClientChannel receiver = Server.getInstance().getOnlineUserByNick(msg.getReceptor());
-                new Request().sendDirectMessage(nick, receiver, msg.getText());
+                new RequestAPI().sendDirectMessage(nick, receiver, msg.getText());
                 break;
         }
     }

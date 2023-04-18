@@ -4,7 +4,7 @@ import controller.Server;
 public class Main {
 
 	public static void main(String[] args) {
-		//ACEPTING CONNECTIONS
+		//Main Thread listens and registers connections 
 		while (true) {
 			ClientChannel cc = new ClientChannel(Server.getInstance().listenConnections());
 			cc.start();

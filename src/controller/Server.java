@@ -5,7 +5,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
-import chats.Chat;
 import connection.ClientChannel;
 
 
@@ -19,9 +18,8 @@ public class Server implements Enviroment {
 		return instance;
 	}
 
-	private ArrayList<ClientChannel> allOnlineUsers;
-    private ArrayList<Chat> allChats;
-	private ServerSocket serverSocket;
+	private ArrayList<ClientChannel> allOnlineUsers = new ArrayList<>();
+	private ServerSocket serverSocket = null;;
 	// Constructor
 	private Server() {
 		try {
@@ -44,16 +42,6 @@ public class Server implements Enviroment {
 		return this.allOnlineUsers;
 	}
 
-    public Chat getChatByID(int chatID) {
-        for (Chat iterable : allChats) {
-            if (iterable.getcID() == chatID) {
-                return iterable;
-            }
-            
-        }
-        return null;
-    } 
-
 	public ClientChannel getOnlineUserByID(String userID) {
 		long parsedUserID = Long.parseLong(userID);
 		System.out.println(parsedUserID + " parsed ID value");
@@ -73,12 +61,7 @@ public class Server implements Enviroment {
 		}
 		return null;
 	}
-    public void registerChat(Chat chat) {
-        allChats.add(chat);
-    }
-    public void deleteChat(Chat chat) {
-        allChats.remove(chat);
-    }
+
 	public void registerConnection(ClientChannel c) {
 		this.allOnlineUsers.add(c);
 	}

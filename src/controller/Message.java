@@ -6,13 +6,13 @@ public class Message implements Serializable {
 
     private static final long serialVersionUID = 123456789L;
 
-    public static final String NO_TEXT = "none";
-    public final static String NO_RECEPTOR = "SERVER";
+    private static final String NO_TEXT = "none";
+    private static final String NO_EMISOR = "SERVER";
 
     private String pAction = null;
-    private String pEmisor = null;
-    private String pReceptor = NO_RECEPTOR;
-    private String pText = null;
+    private String pEmisor = NO_EMISOR;
+    private String pReceptor = null;
+    private String pText = NO_TEXT;
 
 
     public String getAction() {
