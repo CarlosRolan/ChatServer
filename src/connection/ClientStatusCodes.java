@@ -10,8 +10,6 @@ public interface ClientStatusCodes {
     final String ASKED_FOR_PERMISSION = "ASKED_FOR_PERMISSION";
     final String WAITING_FOR_PERMISSION = "WAITING_FOR_PERMISSION";
 
-    final String START_CHAT = "START_CHAT";
-
     final String CLIENT_NOT_FOUND = "There is not an ONLINE user with that userID or nickName";
     final String SELF_REFERENCE = "You cannot talk with yourself";
 
