@@ -1,5 +1,6 @@
 package connection;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -68,7 +69,7 @@ public class ClientChannel extends Thread implements ClientStatusCodes {
 
     private boolean presenting() {
         Message presentation = readClientMessage();
-        System.out.println(presentation.requestInfo());
+        System.out.println("["+presentation.getEmisor() + "] IS ACCEPTED/online");
         if (presentation.getAction().equals(Request.PRESENT)) {
             nick = presentation.getEmisor();
             return true;
@@ -80,7 +81,7 @@ public class ClientChannel extends Thread implements ClientStatusCodes {
     private void sendComfirmation() {
         Message comfirmation = new Message(PRESENTATION_SUCCES, "SERVER", nick);
         writeClientMessage(comfirmation);
-        System.out.println(comfirmation.requestInfo());
+        System.out.println("SENDING COMFIRMATION TO [" + comfirmation.getReceptor()+"]");
     }
 
     public void writeClientMessage(Message msg) {
@@ -99,7 +100,7 @@ public class ClientChannel extends Thread implements ClientStatusCodes {
             e.printStackTrace();
             return null;
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("["+getNick() + "] HAS LEFT");
             return null;
         }
     }
@@ -112,6 +113,7 @@ public class ClientChannel extends Thread implements ClientStatusCodes {
                 break;
 
             // REQUEST SINGLE CHAT AS A EMISOR
+            //TODO refractor
             case Request.SINGLE_REQUESTED :
                 ClientChannel receptor = null;
                 // We find the picked user by the requester=emisor
@@ -145,12 +147,13 @@ public class ClientChannel extends Thread implements ClientStatusCodes {
         }
     }
 
+    //TODO When an user ledts one single chat, disconnets the other
     @Override
     public void run() {
         while (true) {
             Message msg = readClientMessage();
-            System.out.println(msg.toString());
             try {
+                System.out.println(msg.toString());
                 handleRequest(msg);
             } catch (NullPointerException e) {
                 System.out.println(

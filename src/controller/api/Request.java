@@ -57,7 +57,6 @@ public class Request implements ClientStatusCodes, RequestCodes {
         receptor.setChatting(true);
         receptor.writeClientMessage(forAsked);
         
-
     }
 
      public void denySingle(ClientChannel emisor, ClientChannel requester) {
