@@ -1,5 +1,5 @@
-import connection.ClientChannel;
 import controller.Server;
+import controller.connection.ClientChannel;
 
 public class Main {
 

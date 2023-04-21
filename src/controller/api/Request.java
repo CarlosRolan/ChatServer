@@ -1,9 +1,9 @@
 package controller.api;
 
-import connection.ClientChannel;
-import connection.ClientStatusCodes;
 import controller.Message;
 import controller.Server;
+import controller.connection.ClientChannel;
+import controller.connection.ClientStatusCodes;
 
 public class Request implements ClientStatusCodes, RequestCodes {
 

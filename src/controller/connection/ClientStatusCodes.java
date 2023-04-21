@@ -1,4 +1,4 @@
-package connection;
+package controller.connection;
 
 public interface ClientStatusCodes {
 
