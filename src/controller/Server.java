@@ -8,10 +8,10 @@ import java.util.ArrayList;
 import controller.connection.ClientChannel;
 import controller.env.Enviroment;
 
-
 public class Server implements Enviroment {
 
 	private static Server instance;
+
 	public static Server getInstance() {
 		if (instance == null) {
 			instance = new Server();
@@ -20,7 +20,9 @@ public class Server implements Enviroment {
 	}
 
 	private ArrayList<ClientChannel> allOnlineUsers = new ArrayList<>();
+
 	private ServerSocket serverSocket = null;;
+
 	// Constructor
 	private Server() {
 		try {
@@ -66,9 +68,11 @@ public class Server implements Enviroment {
 	public void registerConnection(ClientChannel c) {
 		this.allOnlineUsers.add(c);
 	}
+
 	public void deleteConnection(ClientChannel c) {
 		this.allOnlineUsers.remove(c);
 	}
+
 
 
 }

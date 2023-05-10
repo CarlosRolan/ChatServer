@@ -11,6 +11,8 @@ bin/controller/Message.class
 bin/controller/package-info.class
 bin/controller/Server.class
 bin/controller/Request.class
+backups/*
+logs/*
 .classpath
 .project
 .editorconfig

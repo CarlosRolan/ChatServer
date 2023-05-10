@@ -1,5 +1,6 @@
 package controller.api;
 
+import controller.ChatReference;
 import controller.Message;
 import controller.Server;
 import controller.connection.ClientChannel;
@@ -69,6 +70,19 @@ public class Request implements ClientStatusCodes, RequestCodes {
      public void sendDirectMessage(String emisorNick, ClientChannel receptor, String textMsg) {
         receptor.writeClientMessage(new Message(SEND_DIRECT_MSG, emisorNick,receptor.getNick(), textMsg));
     }
+
+    public void registerChat(ChatReference chatReference, ClientChannel receptor) {
+        receptor.writeClientMessage(new Message(CHAT_REQUESTED,String.valueOf(chatReference.getChatID()), chatReference.getChatName(), chatReference.getChatDesc()));
+    }
+
+    public void startChat(String chatName, ClientChannel channel) {
+        for (ChatReference iter : channel.getChatRefs()) {
+            if (iter.getChatName().equals(chatName)) {
+                
+            }
+        }
+    }
+
 
     //CHAT BEETWEEN 2 OR MORE USERS
 
