@@ -20,12 +20,15 @@ public final class ClientLog {
         mUser = cc.getNick();
 
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd_MM_yyyy");
+        File logsDir = new File("./logs");
+        File userDir = new File("./logs/" + mUser);
 
-        f = new File("./logs/" + dtf.format(today) + ".txt");
-
+        f = new File("./logs/" + mUser + "/" +dtf.format(today) + ".txt");
         isNewFile = f.exists();
 
         try {
+            logsDir.mkdir();
+            userDir.mkdir();
             f.createNewFile();
             f.setWritable(true);
             fw = new FileWriter(f, true);

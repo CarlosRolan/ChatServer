@@ -1,8 +1,8 @@
 package controller.api;
 
-import controller.ChatReference;
 import controller.Message;
 import controller.Server;
+import controller.chat.ChatReference;
 import controller.connection.ClientChannel;
 import controller.connection.ClientStatusCodes;
 
@@ -10,7 +10,7 @@ public class Request implements ClientStatusCodes, RequestCodes {
 
     private Server server = Server.getInstance();
 
-    //SERVER ACTIONS
+    // SERVER ACTIONS
     public void showOnlineUsers(ClientChannel requester) {
         String nickNames = "";
         for (int i = 0; i < server.getOnlineChannels().size(); i++) {
@@ -21,15 +21,24 @@ public class Request implements ClientStatusCodes, RequestCodes {
         requester.writeClientMessage(new Message(SHOW_ALL_ONLINE, "SERVER", requester.getNick(), nickNames));
     }
 
-    //SINGLE CONVERSATION BEETWEEN 2 USERS ONLY
+    public void showAllChatsForUser(ClientChannel requester) {
+        String chats = "";
+        for (ChatReference iter : requester.getChatRefs()) {
+            System.out.println(iter.toString());
+            chats += iter.toString();
+        }
+        requester.writeClientMessage(new Message(SHOW_ALL_CHATS, "SERVER", requester.getNick(), chats));
+    }
+
+    // SINGLE CONVERSATION BEETWEEN 2 USERS ONLY
     public void requestSingle(ClientChannel requester, ClientChannel receptor) {
 
         if (receptor == null) {
-            //CLient not foud
-            System.out.println(CLIENT_NOT_FOUND);           
+            // CLient not foud
+            System.out.println(CLIENT_NOT_FOUND);
             requester.writeClientMessage(new Message(CLIENT_NOT_FOUND));
         } else if (requester.getNick().equals(receptor.getNick()) | requester.getId() == receptor.getId()) {
-             // Is trying to talk with hiimself
+            // Is trying to talk with hiimself
             System.out.println(SELF_REFERENCE);
             requester.writeClientMessage(new Message(SELF_REFERENCE));
         } else {
@@ -44,7 +53,7 @@ public class Request implements ClientStatusCodes, RequestCodes {
         }
     }
 
-     public void startSingle(ClientChannel requester, ClientChannel receptor) {
+    public void startSingle(ClientChannel requester, ClientChannel receptor) {
         Message forRequested = new Message(START_SINGLE, "SERVER", requester.getNick());
         Message forAsked = new Message(START_SINGLE, "SERVER", receptor.getNick());
 
@@ -57,33 +66,37 @@ public class Request implements ClientStatusCodes, RequestCodes {
         requester.writeClientMessage(forRequested);
         receptor.setChatting(true);
         receptor.writeClientMessage(forAsked);
-        
+
     }
 
-     public void denySingle(ClientChannel emisor, ClientChannel requester) {
+    public void denySingle(ClientChannel emisor, ClientChannel requester) {
         Message denyForRequester = new Message(DENY, emisor.getNick(), requester.getNick(),
-        emisor.getNick() + " no quiere chatear contigo");
-                requester.setChatting(false);
+                emisor.getNick() + " no quiere chatear contigo");
+        requester.setChatting(false);
         requester.writeClientMessage(denyForRequester);
     }
 
-     public void sendDirectMessage(String emisorNick, ClientChannel receptor, String textMsg) {
-        receptor.writeClientMessage(new Message(SEND_DIRECT_MSG, emisorNick,receptor.getNick(), textMsg));
+    public void sendDirectMessage(String emisorNick, ClientChannel receptor, String textMsg) {
+        receptor.writeClientMessage(new Message(SEND_DIRECT_MSG, emisorNick, receptor.getNick(), textMsg));
     }
 
-    public void registerChat(ChatReference chatReference, ClientChannel receptor) {
-        receptor.writeClientMessage(new Message(CHAT_REQUESTED,String.valueOf(chatReference.getChatID()), chatReference.getChatName(), chatReference.getChatDesc()));
+    public void openChat(ClientChannel requester, ChatReference chatRef) {
+        requester.writeClientMessage(new Message(START_CHAT, String.valueOf(chatRef.getChatID())));
     }
 
-    public void startChat(String chatName, ClientChannel channel) {
-        for (ChatReference iter : channel.getChatRefs()) {
-            if (iter.getChatName().equals(chatName)) {
-                
-            }
+    public void registerChat(ClientChannel requester, ChatReference chatRef) {
+        requester.writeClientMessage(new Message(CHAT_REGISTERED, String.valueOf(chatRef.getChatID()),
+                chatRef.getChatName(), chatRef.getChatDesc()));
+
+    }
+
+    public void sendToChat(ClientChannel emisor, ChatReference chatRef, String text) {
+        for (ClientChannel iter : chatRef.getAllParticipants()) {
+            iter.writeClientMessage(
+                    new Message(FROM_CHAT, emisor.getNick(), String.valueOf(chatRef.getChatID()), text));
         }
     }
 
-
-    //CHAT BEETWEEN 2 OR MORE USERS
+    // CHAT BEETWEEN 2 OR MORE USERS
 
 }

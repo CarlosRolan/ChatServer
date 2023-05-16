@@ -1,6 +1,7 @@
 package controller;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 public class Message implements Serializable {
 
@@ -13,7 +14,7 @@ public class Message implements Serializable {
     private String pEmisor = NO_EMISOR;
     private String pReceptor = null;
     private String pText = NO_TEXT;
-
+    private ArrayList<String> params;
 
     public String getAction() {
         return pAction;
@@ -29,6 +30,10 @@ public class Message implements Serializable {
 
     public String getText() {
         return pText;
+    }
+
+    public String getParameter(int index) {
+        return params.get(index);
     }
 
     public Message(String action, String emisor, String receptor, String text) {
@@ -51,6 +56,16 @@ public class Message implements Serializable {
 
     public Message(String action) {
         pAction = action;
+    }
+
+    public Message(String action, String emisor, String receptor, String text, String ...parameters) {
+        pAction = action;
+        pEmisor = emisor;
+        pReceptor = receptor;
+        pText = text;
+        for (int i = 0; i < parameters.length; i++) {
+            params.add(parameters[i]);
+        }
     }
 
     @Override

@@ -6,11 +6,11 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import controller.Message;
 import controller.Server;
 import controller.api.Request;
+import controller.chat.ChatReference;
 import log.ClientLog;
-import controller.ChatReference;
-import controller.Message;
 
 public class ClientChannel extends Thread implements ClientStatusCodes {
 
@@ -161,14 +161,38 @@ public class ClientChannel extends Thread implements ClientStatusCodes {
                 new Request().sendDirectMessage(nick, receiver, msg.getText());
                 break;
 
-            case Request.CHAT_REQUESTED:
-                System.out.println(msg.getAction());
-                ChatReference charRef = new ChatReference(getId() + 100, msg.getReceptor(), msg.getText(), this);
-                new Request().registerChat(charRef, this);
+            case Request.NEW_CHAT:
+                long chatID = 100 + this.getId();
+                String chatTitle = msg.getReceptor();
+                String chatDesc = msg.getText();
+                ChatReference ref = new ChatReference(chatID, chatTitle, chatDesc, this);
+                registerChat(ref);
+                new Request().registerChat(this, ref);
+                break;
+            case Request.SHOW_ALL_CHATS:
+                new Request().showAllChatsForUser(this);
                 break;
 
             case Request.START_CHAT:
-                String ChatName = msg.getReceptor();
+                long chatId = Long.valueOf(msg.getEmisor());
+                System.out.println("CHAT ID[" + chatId + "]");
+                ChatReference chatRef = getChatByID(chatId);
+                System.out.println("CHAT FOUND =>" + chatRef.toString());
+                break;
+                //TODO
+            case Request.ADD_MEMBER:
+                long id = Long.valueOf(msg.getEmisor());
+                ChatReference cRef = getChatByID(id);
+                ClientChannel newParticipant = Server.getInstance().getOnlineUserByNick(msg.getReceptor());
+                cRef.addParticipant(newParticipant);
+                newParticipant.registerChat(cRef);
+                updateChat(cRef);
+                break;
+            case Request.TO_CHAT:
+                long idR = Long.valueOf(msg.getEmisor());
+                ChatReference refs = getChatByID(idR);
+                new Request().sendToChat(this, refs, msg.getReceptor());
+                break;
 
         }
     }
@@ -177,8 +201,32 @@ public class ClientChannel extends Thread implements ClientStatusCodes {
         this.chatReferences.add(chatRef);
     }
 
+    public void updateChat(ChatReference chatRef) {
+        chatReferences.remove(chatRef);
+        chatReferences.add(chatRef);
+    }
+
     public void deleteChat(ChatReference chatRef) {
         this.chatReferences.remove(chatRef);
+    }
+
+    public ChatReference getChatByID(long chatID) {
+        for (ChatReference iter : chatReferences) {
+            if (iter.getChatID() == chatID) {
+                return iter;
+            }
+        }
+        return null;
+    }
+
+    public ChatReference getChatReference(String chatNick) {
+        for (ChatReference iterator : chatReferences) {
+            if (iterator.getChatName().equals(chatNick)) {
+                return iterator;
+            }
+        }
+
+        return null;
     }
 
     // TODO When an user ledts one single chat, disconnets the other
@@ -198,4 +246,5 @@ public class ClientChannel extends Thread implements ClientStatusCodes {
         }
 
     }
+
 }
