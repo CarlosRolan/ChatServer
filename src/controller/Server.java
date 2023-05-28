@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import controller.chat.ChatReference;
 import controller.connection.ClientChannel;
 import controller.env.Enviroment;
 
@@ -20,8 +21,11 @@ public class Server implements Enviroment {
 	}
 
 	private ArrayList<ClientChannel> allOnlineUsers = new ArrayList<>();
+	private ArrayList<ChatReference> chatReferences = new ArrayList<>();
 
-	private ServerSocket serverSocket = null;;
+	private ServerSocket serverSocket = null;
+
+	
 
 	// Constructor
 	private Server() {
@@ -73,6 +77,45 @@ public class Server implements Enviroment {
 		this.allOnlineUsers.remove(c);
 	}
 
+	public int getNumberOfOnlineUsers() {
+		return allOnlineUsers.size();
+	}
 
+	public ArrayList<ChatReference> getChatRefs() {
+        return chatReferences;
+    }
+
+	public ChatReference getChatReferenceByID(long chatID) {
+		for (ChatReference iterator : chatReferences) {
+			if( iterator.getChatID() == chatID) {
+				return iterator;
+			}
+		}
+		return null;
+	}
+
+
+    public void registerChat(ChatReference chatRef) {
+        this.chatReferences.add(chatRef);
+    }
+
+    public void updateChat(ChatReference chatRef) {
+        chatReferences.remove(chatRef);
+        chatReferences.add(chatRef);
+    }
+
+    public void deleteChat(ChatReference chatRef) {
+        chatReferences.remove(chatRef);
+    }
+
+    public ChatReference getChatReference(String chatNick) {
+        for (ChatReference iterator : chatReferences) {
+            if (iterator.getChatName().equals(chatNick)) {
+                return iterator;
+            }
+        }
+
+        return null;
+    }
 
 }

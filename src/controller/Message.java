@@ -1,20 +1,26 @@
 package controller;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
 public class Message implements Serializable {
+    public enum MsgType {
+        REQUEST,
+        MESSAGE,
+        ERROR;
+    }
 
     private static final long serialVersionUID = 123456789L;
 
-    private static final String NO_TEXT = "none";
-    private static final String NO_EMISOR = "SERVER";
-
+    private final MsgType PACKAGE_TYPE;
     private String pAction = null;
-    private String pEmisor = NO_EMISOR;
+    private String pEmisor;
     private String pReceptor = null;
-    private String pText = NO_TEXT;
-    private ArrayList<String> params;
+    private String pText;
+    private String[] params;
+
+    public MsgType typeOf() {
+        return PACKAGE_TYPE;
+    }
 
     public String getAction() {
         return pAction;
@@ -33,45 +39,74 @@ public class Message implements Serializable {
     }
 
     public String getParameter(int index) {
-        return params.get(index);
+        return params[index];
     }
 
-    public Message(String action, String emisor, String receptor, String text) {
+    public String[] getParameters() {
+        return params;
+    }
+
+    public Message(final MsgType type, String action, String emisor, String receptor, String text) {
+        PACKAGE_TYPE = type;
         pAction = action;
         pEmisor = emisor;
         pReceptor = receptor;
         pText = text;
     }
 
-    public Message(String action, String emisor, String receptor) {
+    public Message(final MsgType type, String action, String emisor, String receptor) {
+        PACKAGE_TYPE = type;
         pAction = action;
         pEmisor = emisor;
         pReceptor = receptor;
     }
 
-    public Message(String action, String emisor) {
+    public Message(final MsgType type, String action, String emisor, String receptor, String... parameters) {
+        PACKAGE_TYPE = type;
+        pAction = action;
+        pEmisor = emisor;
+        pReceptor = receptor;
+        params = parameters;
+    }
+
+    public Message(final MsgType type, String action, String emisor) {
+        PACKAGE_TYPE = type;
         pAction = action;
         pEmisor = emisor;
     }
 
-    public Message(String action) {
+    public Message(final MsgType type, String action) {
+        PACKAGE_TYPE = type;
         pAction = action;
     }
 
-    public Message(String action, String emisor, String receptor, String text, String ...parameters) {
+    public Message(final MsgType type, String action, String... parameters) {
+        PACKAGE_TYPE = type;
+        pAction = action;
+        params = parameters;
+    }
+
+    public Message(final MsgType type, String action, String receptor, String... parameters) {
+        PACKAGE_TYPE = type;
+        pAction = action;
+        pReceptor = receptor;
+        params = parameters;
+    }
+
+    public Message(final MsgType type, String action, String emisor, String receptor, String text,
+            String... parameters) {
+        PACKAGE_TYPE = type;
         pAction = action;
         pEmisor = emisor;
         pReceptor = receptor;
         pText = text;
-        for (int i = 0; i < parameters.length; i++) {
-            params.add(parameters[i]);
-        }
+        params = parameters;
     }
 
     @Override
     public String toString() {
-        return "MSG[\n\tAction{"+pAction+"}\n\t"+"Emisor{"+pEmisor+"}\n\t"+"Receptor{"+pReceptor+"}\n\t"+"Text{"+pText+"}\n]";
+        return "MSG[\n\tAction{" + pAction + "}\n\t" + "Emisor{" + pEmisor + "}\n\t" + "Receptor{" + pReceptor + "}\n\t"
+                + "Text{" + pText + "}\n]";
     }
-    
 
 }

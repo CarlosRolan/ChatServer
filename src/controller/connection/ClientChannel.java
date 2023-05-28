@@ -4,19 +4,19 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
 
 import controller.Message;
+import controller.Message.MsgType;
 import controller.Server;
 import controller.api.Request;
+import controller.api.RequestCodes;
 import controller.chat.ChatReference;
 import log.ClientLog;
 
-public class ClientChannel extends Thread implements ClientStatusCodes {
+public class ClientChannel extends Thread implements RequestCodes {
 
     private Socket pSocket = null;
     private String nick;
-    private ArrayList<ChatReference> chatReferences = new ArrayList<>();
     private ClientLog cLog;
 
     private ObjectInputStream ois;
@@ -30,10 +30,6 @@ public class ClientChannel extends Thread implements ClientStatusCodes {
 
     public void setChatting(boolean isChatting) {
         chatting = isChatting;
-    }
-
-    public ArrayList<ChatReference> getChatRefs() {
-        return chatReferences;
     }
 
     public String getNick() {
@@ -90,7 +86,7 @@ public class ClientChannel extends Thread implements ClientStatusCodes {
 
     private void sendComfirmation() {
         cLog = new ClientLog(this);
-        Message comfirmation = new Message(PRESENTATION_SUCCES, "SERVER", nick);
+        Message comfirmation = new Message(MsgType.REQUEST, PRESENTATION_SUCCES, "SERVER", nick);
         writeClientMessage(comfirmation);
         System.out.println("SENDING COMFIRMATION TO [" + comfirmation.getReceptor() + "]");
         cLog.logIn();
@@ -121,9 +117,16 @@ public class ClientChannel extends Thread implements ClientStatusCodes {
 
     public void handleRequest(Message msg) {
 
+        ChatReference chatReference = null;
+
         cLog.log(msg.toString());
 
         switch (msg.getAction()) {
+
+            case Request.SHOW_ALL_MEMBERS:
+                ChatReference selectedChat = Server.getInstance().getChatReferenceByID(Long.valueOf(msg.getReceptor()));
+                new Request().showAllMembers(this, selectedChat);
+                break;
             case Request.SHOW_ALL_ONLINE:
                 new Request().showOnlineUsers(this);
                 break;
@@ -166,67 +169,30 @@ public class ClientChannel extends Thread implements ClientStatusCodes {
                 String chatTitle = msg.getReceptor();
                 String chatDesc = msg.getText();
                 ChatReference ref = new ChatReference(chatID, chatTitle, chatDesc, this);
-                registerChat(ref);
+                Server.getInstance().registerChat(ref);
                 new Request().registerChat(this, ref);
                 break;
+
             case Request.SHOW_ALL_CHATS:
                 new Request().showAllChatsForUser(this);
                 break;
 
             case Request.START_CHAT:
-                long chatId = Long.valueOf(msg.getEmisor());
-                System.out.println("CHAT ID[" + chatId + "]");
-                ChatReference chatRef = getChatByID(chatId);
-                System.out.println("CHAT FOUND =>" + chatRef.toString());
+                chatReference = Server.getInstance().getChatReferenceByID(Long.valueOf(msg.getEmisor()));
+                new Request().openChat(this, chatReference);
                 break;
-                //TODO
+
             case Request.ADD_MEMBER:
-                long id = Long.valueOf(msg.getEmisor());
-                ChatReference cRef = getChatByID(id);
-                ClientChannel newParticipant = Server.getInstance().getOnlineUserByNick(msg.getReceptor());
-                cRef.addParticipant(newParticipant);
-                newParticipant.registerChat(cRef);
-                updateChat(cRef);
+                chatReference = Server.getInstance().getChatReferenceByID(Long.valueOf(msg.getEmisor()));
+                ClientChannel newMember = Server.getInstance().getOnlineUserByID(msg.getReceptor());
+                new Request().addMember(this, newMember, chatReference);
                 break;
+
             case Request.TO_CHAT:
-                long idR = Long.valueOf(msg.getEmisor());
-                ChatReference refs = getChatByID(idR);
+                ChatReference refs = Server.getInstance().getChatReferenceByID(Long.valueOf(msg.getEmisor()));
                 new Request().sendToChat(this, refs, msg.getReceptor());
                 break;
-
         }
-    }
-
-    public void registerChat(ChatReference chatRef) {
-        this.chatReferences.add(chatRef);
-    }
-
-    public void updateChat(ChatReference chatRef) {
-        chatReferences.remove(chatRef);
-        chatReferences.add(chatRef);
-    }
-
-    public void deleteChat(ChatReference chatRef) {
-        this.chatReferences.remove(chatRef);
-    }
-
-    public ChatReference getChatByID(long chatID) {
-        for (ChatReference iter : chatReferences) {
-            if (iter.getChatID() == chatID) {
-                return iter;
-            }
-        }
-        return null;
-    }
-
-    public ChatReference getChatReference(String chatNick) {
-        for (ChatReference iterator : chatReferences) {
-            if (iterator.getChatName().equals(chatNick)) {
-                return iterator;
-            }
-        }
-
-        return null;
     }
 
     // TODO When an user ledts one single chat, disconnets the other
