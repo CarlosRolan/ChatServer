@@ -1,4 +1,4 @@
-package controller.api;
+package api;
 
 public interface RequestCodes {
     // SERVER ACTIONS

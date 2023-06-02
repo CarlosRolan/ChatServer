@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 import controller.chat.ChatReference;
 import controller.connection.ClientChannel;
-import controller.env.Enviroment;
+import controller.connection.env.Enviroment;
 
 public class Server implements Enviroment {
 

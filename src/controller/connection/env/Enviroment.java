@@ -1,4 +1,4 @@
-package controller.env;
+package controller.connection.env;
 
 public interface Enviroment {
 
