@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import controller.connection.ClientChannel;
+import controller.connection.ClientConnection;
 
 public final class ClientLog {
 
@@ -16,14 +16,14 @@ public final class ClientLog {
     private String mUser;
     private boolean isNewFile = true;
 
-    public ClientLog(ClientChannel cc) {
+    public ClientLog(ClientConnection cc) {
         mUser = cc.getNick();
 
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd_MM_yyyy");
         File logsDir = new File("./logs");
         File userDir = new File("./logs/" + mUser);
 
-        f = new File("./logs/" + mUser + "/" +dtf.format(today) + ".txt");
+        f = new File("./logs/" + mUser + "/" + dtf.format(today) + ".txt");
         isNewFile = f.exists();
 
         try {
@@ -53,6 +53,7 @@ public final class ClientLog {
     }
 
     public void log(String msg) {
+        System.out.println("OUT==>" + msg.toString());
         try {
             fw.append(msg + " [" + today.getHour() + ":" + today.getMinute() + ":" + today.getSecond() + "]\n");
             fw.flush();
