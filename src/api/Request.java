@@ -1,7 +1,9 @@
 package api;
 
-import controller.Msg;
-import controller.Msg.MsgType;
+import com.Msg;
+import com.Msg.MsgType;
+import com.RequestCodes;
+
 import controller.Server;
 import controller.connection.ClientConnection;
 
@@ -24,7 +26,7 @@ public class Request implements RequestCodes {
 
         Msg respond = new Msg(MsgType.REQUEST);
 
-        respond.setAction(SHOW_ALL_ONLINE);
+        respond.setAction(REQ_SHOW_ALL_ONLINE);
 
         if (allOnline.length > 0) {
             respond.setParameters(allOnline);
@@ -43,25 +45,25 @@ public class Request implements RequestCodes {
 
         if (candidateId.equals(requesterId)) {
             respond = new Msg(MsgType.ERROR);
-            respond.setAction(SELF_REFERENCE);
+            respond.setAction(ERROR_SELF_REFERENCE);
         } else if (candidate != null) {
             // to candidate
             toCandidate = new Msg(MsgType.REQUEST);
-            toCandidate.setAction(ASKED_FOR_PERMISSION);
+            toCandidate.setAction(REQ_ASKED_FOR_PERMISSION);
             toCandidate.setEmisor(requesterId);
             toCandidate.setReceptor(String.valueOf(candidateId));
             toCandidate.setParameter(0, requesterNick);
             candidate.writeClientMessage(toCandidate);
             // to requester
             respond = new Msg(MsgType.REQUEST);
-            respond.setAction(WAITING_FOR_PERMISSION);
+            respond.setAction(REQ_WAITING_FOR_PERMISSION);
             respond.setEmisor(candidateId);
             respond.setReceptor(requesterId);
             respond.setParameter(0, candidate.getNick());
             respond.setBody(requesterNick + " waiting for " + candidate.getNick());
         } else {
             respond = new Msg(MsgType.ERROR);
-            respond.setAction(CLIENT_NOT_FOUND);
+            respond.setAction(ERROR_CLIENT_NOT_FOUND);
         }
 
         return respond;
@@ -74,14 +76,14 @@ public class Request implements RequestCodes {
         // the requester is waiting for the respond at the moment
         ClientConnection requester = server.getClientConnectionById(Integer.parseInt(requesterId));
 
-        toRequester.setAction(START_SINGLE);
+        toRequester.setAction(REQ_START_SINGLE);
         toRequester.setEmisor(requesterId);
         toRequester.setReceptor(requestedId);
         toRequester.setParameter(0, requestedNick);
 
         requester.writeClientMessage(toRequester);
 
-        respond.setAction(START_SINGLE);
+        respond.setAction(REQ_START_SINGLE);
         respond.setEmisor(requestedId);
         respond.setReceptor(requesterId);
         respond.setParameter(0, requester.getNick());
