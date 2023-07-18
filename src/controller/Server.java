@@ -60,4 +60,13 @@ public class Server implements Enviroment {
 	public int getNumberOfOnlineUsers() {
 		return allOnlineCon.size();
 	}
+
+	public ClientConnection getClientConnectionById(int userId) {
+		for (ClientConnection iter : allOnlineCon) {
+			if (userId == iter.getId()) {
+				return iter;
+			}
+		}
+		return null;
+	}
 }

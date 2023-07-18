@@ -5,14 +5,16 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+import api.Request;
 import api.RequestCodes;
-import api.RequestRespond;
 import controller.Msg;
 import controller.Msg.MsgType;
 import controller.Server;
 import log.ClientLog;
 
 public class ClientConnection extends Thread implements RequestCodes {
+
+    Server server = Server.getInstance();
 
     private Socket pSocket = null;
     private String pNick;
@@ -23,14 +25,45 @@ public class ClientConnection extends Thread implements RequestCodes {
     private ObjectOutputStream oos;
 
     /**
+     * @return the mId
+     */
+    public String getConId() {
+        return String.valueOf(mId);
+    }
+
+    /**
+     * @param ois the ois to set
+     */
+    public void setOis(ObjectInputStream ois) {
+        this.ois = ois;
+    }
+
+    /**
+     * @param oos the oos to set
+     */
+    public void setOos(ObjectOutputStream oos) {
+        this.oos = oos;
+    }
+
+    /**
+     * @return the ois
+     */
+    public ObjectInputStream getOis() {
+        return ois;
+    }
+
+    /**
+     * @return the oos
+     */
+    public ObjectOutputStream getOos() {
+        return oos;
+    }
+
+    /**
      * @return the pNick
      */
     public String getNick() {
         return pNick;
-    }
-
-    public long getId() {
-        return mId;
     }
 
     // Constructor
@@ -63,7 +96,7 @@ public class ClientConnection extends Thread implements RequestCodes {
         cLog = new ClientLog(this);
         Msg comfirmation = new Msg(MsgType.REQUEST);
         comfirmation.setAction(PRESENTATION_SUCCES);
-        comfirmation.setReceptor(getNick());
+        comfirmation.setReceptor(getConId());
         System.out.println("SENDING COMFIRMATION TO [" + comfirmation.getReceptor() + "]");
         writeClientMessage(comfirmation);
 
@@ -71,6 +104,7 @@ public class ClientConnection extends Thread implements RequestCodes {
     }
 
     public void writeClientMessage(Msg msg) {
+        System.out.println(getConId() + getNick());
         System.out.println("OUT==>" + msg.toString());
         try {
             oos.writeObject(msg);
@@ -85,6 +119,8 @@ public class ClientConnection extends Thread implements RequestCodes {
             Msg msg = (Msg) ois.readObject();
             System.out.println("<==IN" + msg.toString());
             return msg;
+        } catch (NullPointerException e) {
+            return null;
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
             return null;
@@ -104,28 +140,28 @@ public class ClientConnection extends Thread implements RequestCodes {
 
                 break;
             case SHOW_ALL_ONLINE:
-                respond = new Msg(MsgType.REQUEST);
-                respond.setAction(SHOW_ALL_ONLINE);
-                respond.setParameters(new RequestRespond().showOnlineUsers(this));
+                respond = new Request().showOnlineUsers(this);
                 writeClientMessage(respond);
                 break;
 
             // REQUEST SINGLE CHAT AS A EMISOR
             case SINGLE_REQUESTED:
-
+                respond = new Request().askForSingle(getConId(), msg.getReceptor(), msg.getBody());
+                writeClientMessage(respond);
                 break;
 
             // REQUESTED CHAT AS A RECEPTOR = EMISOR
             case ALLOW:
-
+                respond = new Request().allowSingleChat(msg.getReceptor(), getConId(), getNick());
+                writeClientMessage(respond);
                 break;
 
             case DENY:
 
                 break;
 
-            case SEND_DIRECT_MSG:
-
+            case DIRECT_MSG:
+                new Request().sendDirectMsg(msg.getEmisor(), msg.getReceptor(), msg.getBody());
                 break;
 
             case NEW_CHAT:
@@ -153,7 +189,7 @@ public class ClientConnection extends Thread implements RequestCodes {
     @Override
     public void run() {
         if (recievePresentation()) {
-            Server.getInstance().registerConnection(this);
+            server.registerConnection(this);
             sendComfirmation();
             while (true) {
                 Msg msg = readClientMessage();
@@ -162,7 +198,7 @@ public class ClientConnection extends Thread implements RequestCodes {
                 } catch (NullPointerException e) {
                     System.out.println(
                             CONNECTION_CLOSED + " [" + pNick + "]");
-                    Server.getInstance().deleteConnection(this);
+                    server.deleteConnection(this);
                     break;
                 }
             }
