@@ -1,5 +1,8 @@
 package api;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import com.Msg;
 import com.Msg.MsgType;
 import com.RequestCodes;
@@ -7,9 +10,33 @@ import com.RequestCodes;
 import controller.Server;
 import controller.connection.ClientConnection;
 
-public class Request implements RequestCodes {
+public class RequestHandler implements RequestCodes {
 
-    public Server server = Server.getInstance();
+    private Server server = Server.getInstance();
+
+    public static void newRequest(String methodName) {
+        try {
+            Class c = RequestHandler.class;
+            Method m = c.getMethod(methodName);
+            m.invoke(c.newInstance());
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void simpleMethod() {
+        System.out.println("Solo soy un gusano");
+    }
 
     public Msg showOnlineUsers(ClientConnection cc) {
         String[] allOnline = new String[server.getNumberOfOnlineUsers() - 1];

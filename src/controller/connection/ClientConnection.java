@@ -9,7 +9,7 @@ import com.Msg;
 import com.Msg.MsgType;
 import com.RequestCodes;
 
-import api.Request;
+import api.RequestHandler;
 import controller.Server;
 import log.ClientLog;
 
@@ -122,20 +122,20 @@ public class ClientConnection extends Thread implements RequestCodes {
         switch (msg.getAction()) {
 
             case SHOW_ALL_MEMBERS:
-
                 break;
+
             case REQ_SHOW_ALL_ONLINE:
-                respond = new Request().showOnlineUsers(this);
+                respond = new RequestHandler().showOnlineUsers(this);
                 writeClientMessage(respond);
                 break;
 
             case SINGLE_REQUESTED:
-                respond = new Request().askForSingle(getConId(), msg.getReceptor(), msg.getBody());
+                respond = new RequestHandler().askForSingle(getConId(), msg.getReceptor(), msg.getBody());
                 writeClientMessage(respond);
                 break;
 
             case REQ_ALLOW:
-                respond = new Request().allowSingleChat(msg.getReceptor(), getConId(), getNick());
+                respond = new RequestHandler().allowSingleChat(msg.getReceptor(), getConId(), getNick());
                 writeClientMessage(respond);
                 break;
 
@@ -144,7 +144,7 @@ public class ClientConnection extends Thread implements RequestCodes {
                 break;
 
             case DIRECT_MSG:
-                new Request().sendDirectMsg(msg.getEmisor(), msg.getReceptor(), msg.getBody());
+                new RequestHandler().sendDirectMsg(msg.getEmisor(), msg.getReceptor(), msg.getBody());
                 break;
 
             case NEW_CHAT:
