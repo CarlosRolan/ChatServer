@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import controller.connection.ClientConnection;
+import controller.connection.ClientChannel;
 
 public final class ClientLog {
 
@@ -16,7 +16,7 @@ public final class ClientLog {
     private String mUser;
     private boolean isNewFile = true;
 
-    public ClientLog(ClientConnection cc) {
+    public ClientLog(ClientChannel cc) {
         mUser = cc.getNick();
 
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd_MM_yyyy");
@@ -44,6 +44,21 @@ public final class ClientLog {
                         + today.getSecond() + "\n");
             } else {
                 fw.append("\n" + mUser + " LOGGED IN at : " + today.getHour() + ":" + today.getMinute() + ":"
+                        + today.getSecond() + "\n");
+            }
+            fw.flush();
+        } catch (IOException e) {
+            System.out.println("Could not init the user history file");
+        }
+    }
+
+    public void logOut() {
+        try {
+            if (isNewFile) {
+                fw.write(mUser + " LOGGED OUT at : " + today.getHour() + ":" + today.getMinute() + ":"
+                        + today.getSecond() + "\n");
+            } else {
+                fw.append("\n" + mUser + " LOGGED OUT at : " + today.getHour() + ":" + today.getMinute() + ":"
                         + today.getSecond() + "\n");
             }
             fw.flush();

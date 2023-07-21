@@ -5,7 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
-import controller.connection.ClientConnection;
+import controller.connection.ClientChannel;
 import controller.connection.env.Enviroment;
 
 public class Server implements Enviroment {
@@ -19,7 +19,7 @@ public class Server implements Enviroment {
 		return instance;
 	}
 
-	private ArrayList<ClientConnection> allOnlineCon = new ArrayList<>();
+	private ArrayList<ClientChannel> allOnlineCon = new ArrayList<>();
 
 	private ServerSocket serverSocket = null;
 
@@ -45,15 +45,15 @@ public class Server implements Enviroment {
 	/**
 	 * @return the allOnlineCon
 	 */
-	public ArrayList<ClientConnection> getOnlineCon() {
+	public ArrayList<ClientChannel> getOnlineCon() {
 		return allOnlineCon;
 	}
 
-	public void registerConnection(ClientConnection c) {
+	public void registerConnection(ClientChannel c) {
 		allOnlineCon.add(c);
 	}
 
-	public void deleteConnection(ClientConnection c) {
+	public void deleteConnection(ClientChannel c) {
 		allOnlineCon.remove(c);
 	}
 
@@ -61,8 +61,8 @@ public class Server implements Enviroment {
 		return allOnlineCon.size();
 	}
 
-	public ClientConnection getClientConnectionById(int userId) {
-		for (ClientConnection iter : allOnlineCon) {
+	public ClientChannel getClientConnectionById(int userId) {
+		for (ClientChannel iter : allOnlineCon) {
 			if (userId == iter.getId()) {
 				return iter;
 			}

@@ -1,6 +1,6 @@
 import api.RequestHandler;
 import controller.Server;
-import controller.connection.ClientConnection;
+import controller.connection.ClientChannel;
 
 public class Main {
 
@@ -9,9 +9,9 @@ public class Main {
 	public static void main(String[] args) {
 		// Main Thread listens and registers connections
 		RequestHandler.newRequest("simpleMethod");
-		ClientConnection cc;
+		ClientChannel cc;
 		while (true) {
-			cc = new ClientConnection(server.listenConnections());
+			cc = new ClientChannel(server.listenConnections());
 			cc.start();
 		}
 	}

@@ -8,7 +8,7 @@ import com.Msg.MsgType;
 import com.RequestCodes;
 
 import controller.Server;
-import controller.connection.ClientConnection;
+import controller.connection.ClientChannel;
 
 public class RequestHandler implements RequestCodes {
 
@@ -38,11 +38,11 @@ public class RequestHandler implements RequestCodes {
         System.out.println("Solo soy un gusano");
     }
 
-    public Msg showOnlineUsers(ClientConnection cc) {
+    public Msg showOnlineUsers(ClientChannel cc) {
         String[] allOnline = new String[server.getNumberOfOnlineUsers() - 1];
         int i = 0;
 
-        for (ClientConnection iter : server.getOnlineCon()) {
+        for (ClientChannel iter : server.getOnlineCon()) {
             if (!iter.getConId().equals(cc.getConId()) && !iter.getNick().equals(cc.getNick())) {
                 System.out.println(iter.getNick());
                 allOnline[i] = "[" + iter.getConId() + "]-" + iter.getNick();
@@ -68,7 +68,7 @@ public class RequestHandler implements RequestCodes {
         Msg respond = null;
         Msg toCandidate = null;
         System.out.println("ID CANDIDATE [" + candidateId + "]");
-        ClientConnection candidate = server.getClientConnectionById(Integer.valueOf(candidateId));
+        ClientChannel candidate = server.getClientConnectionById(Integer.valueOf(candidateId));
 
         if (candidateId.equals(requesterId)) {
             respond = new Msg(MsgType.ERROR);
@@ -80,7 +80,7 @@ public class RequestHandler implements RequestCodes {
             toCandidate.setEmisor(requesterId);
             toCandidate.setReceptor(String.valueOf(candidateId));
             toCandidate.setParameter(0, requesterNick);
-            candidate.writeClientMessage(toCandidate);
+            candidate.writeMessage(toCandidate);
             // to requester
             respond = new Msg(MsgType.REQUEST);
             respond.setAction(REQ_WAITING_FOR_PERMISSION);
@@ -101,14 +101,14 @@ public class RequestHandler implements RequestCodes {
         Msg toRequester = new Msg(MsgType.REQUEST);
 
         // the requester is waiting for the respond at the moment
-        ClientConnection requester = server.getClientConnectionById(Integer.parseInt(requesterId));
+        ClientChannel requester = server.getClientConnectionById(Integer.parseInt(requesterId));
 
         toRequester.setAction(REQ_START_SINGLE);
         toRequester.setEmisor(requesterId);
         toRequester.setReceptor(requestedId);
         toRequester.setParameter(0, requestedNick);
 
-        requester.writeClientMessage(toRequester);
+        requester.writeMessage(toRequester);
 
         respond.setAction(REQ_START_SINGLE);
         respond.setEmisor(requestedId);
@@ -120,7 +120,7 @@ public class RequestHandler implements RequestCodes {
 
     public void sendSingleMsg(String emisorId, String receptorId, String text) {
 
-        ClientConnection receptor = server.getClientConnectionById(Integer.parseInt(receptorId));
+        ClientChannel receptor = server.getClientConnectionById(Integer.parseInt(receptorId));
 
         Msg directMsg = new Msg(MsgType.MESSAGE);
 
@@ -128,11 +128,11 @@ public class RequestHandler implements RequestCodes {
         directMsg.setEmisor(emisorId);
         directMsg.setReceptor(receptorId);
         directMsg.setBody(text);
-        receptor.writeClientMessage(directMsg);
+        receptor.writeMessage(directMsg);
     }
 
     public void exitSigle(String emisorId, String receptorId) {
-        ClientConnection receptor = server.getClientConnectionById(Integer.parseInt(receptorId));
+        ClientChannel receptor = server.getClientConnectionById(Integer.parseInt(receptorId));
 
         Msg exitSingle = new Msg(MsgType.REQUEST);
 
@@ -140,7 +140,7 @@ public class RequestHandler implements RequestCodes {
         exitSingle.setEmisor(emisorId);
         exitSingle.setReceptor(receptorId);
 
-        receptor.writeClientMessage(exitSingle);
+        receptor.writeMessage(exitSingle);
     }
 
 }
