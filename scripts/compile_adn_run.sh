@@ -1,10 +1,15 @@
 #!/bin/bash
 
 # Function to download the dependencies
-download_dependencies() {
-    # Download the JAR files to the lib directory using curl or wget
-    # For example, using curl:
-    curl -o ../lib/LocalChatAPI.jar "https://github.com/CarlosRolan/LocalChatAPI.git"
+# Function to clone and compile the dependencies
+clone_and_compile_dependencies() {
+    # Clone the repository of your dependency
+    cd ../scripts
+    git clone https://github.com/CarlosRolan/LocalChatAPI.git
+
+    # Compile the source code (adjust the compilation command as needed)
+    javac -d ../lib $(find . -name "*.java")
+    cd ..
 }
 
 # Check if the "lib" directory exists. If not, create it.

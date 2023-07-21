@@ -118,17 +118,29 @@ public class RequestHandler implements RequestCodes {
         return respond;
     }
 
-    public void sendDirectMsg(String emisorId, String receptorId, String text) {
+    public void sendSingleMsg(String emisorId, String receptorId, String text) {
 
         ClientConnection receptor = server.getClientConnectionById(Integer.parseInt(receptorId));
 
         Msg directMsg = new Msg(MsgType.MESSAGE);
 
-        directMsg.setAction(DIRECT_MSG);
+        directMsg.setAction(MSG_SINGLE_MSG);
         directMsg.setEmisor(emisorId);
         directMsg.setReceptor(receptorId);
         directMsg.setBody(text);
         receptor.writeClientMessage(directMsg);
+    }
+
+    public void exitSigle(String emisorId, String receptorId) {
+        ClientConnection receptor = server.getClientConnectionById(Integer.parseInt(receptorId));
+
+        Msg exitSingle = new Msg(MsgType.REQUEST);
+
+        exitSingle.setAction(REQ_EXIT_SINGLE);
+        exitSingle.setEmisor(emisorId);
+        exitSingle.setReceptor(receptorId);
+
+        receptor.writeClientMessage(exitSingle);
     }
 
 }

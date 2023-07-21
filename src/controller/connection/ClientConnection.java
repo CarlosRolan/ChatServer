@@ -143,8 +143,12 @@ public class ClientConnection extends Thread implements RequestCodes {
 
                 break;
 
-            case DIRECT_MSG:
-                new RequestHandler().sendDirectMsg(msg.getEmisor(), msg.getReceptor(), msg.getBody());
+            case MSG_SINGLE_MSG:
+                new RequestHandler().sendSingleMsg(msg.getEmisor(), msg.getReceptor(), msg.getBody());
+                break;
+
+            case REQ_EXIT_SINGLE:
+                new RequestHandler().exitSigle(getConId(), msg.getReceptor());
                 break;
 
             case NEW_CHAT:
