@@ -100,17 +100,17 @@ public class ClientConnection extends Thread implements RequestCodes {
     public Msg readClientMessage() {
         try {
             Msg msg = (Msg) ois.readObject();
-            System.out.println("<==IN" + msg.toString());
+            System.out.println("<==IN " + msg.toString());
             return msg;
         } catch (NullPointerException e) {
-            e.printStackTrace();
+            System.out.println("NullPointerException");
             return null;
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            System.out.println("ClassNotFoundException");
             return null;
         } catch (IOException e) {
+            System.out.println("IOException");
             System.err.println("[" + getNick() + "] HAS LEFT");
-            e.printStackTrace();
             return null;
         }
     }
@@ -178,17 +178,18 @@ public class ClientConnection extends Thread implements RequestCodes {
         if (recievePresentation()) {
             server.registerConnection(this);
             sendComfirmation();
-            while (true) {
-                Msg msg = readClientMessage();
-                try {
+            try {
+                while (true) {
+                    Msg msg = readClientMessage();
                     handleRequest(msg);
-                } catch (NullPointerException e) {
-                    System.out.println(
-                            INFO_CONNECTION_CLOSED + " [" + pNick + "]");
-                    server.deleteConnection(this);
-                    break;
                 }
+            } catch (Exception e) {
+                System.out.println(e.getClass());
+                System.out.println(
+                        INFO_CONNECTION_CLOSED + " [" + pNick + "]");
+                server.deleteConnection(this);
             }
+
         }
 
     }
