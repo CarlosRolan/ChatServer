@@ -17,10 +17,12 @@ public class ClientChannel extends Connection {
 
     public ClientChannel(String nick) {
         super(nick);
+        cLog = new ClientLog(this);
     }
 
     public ClientChannel(Socket socket) {
         super(socket);
+        cLog = new ClientLog(this);
     }
 
     public void handleRequest(Msg msg) {
@@ -29,15 +31,12 @@ public class ClientChannel extends Connection {
 
         switch (msg.getAction()) {
 
-            case SHOW_ALL_MEMBERS:
-                break;
-
-            case REQ_SHOW_ALL_ONLINE:
+            case REQ_SHOW_ALL:
                 respond = new RequestHandler().showOnlineUsers(this);
                 writeMessage(respond);
                 break;
 
-            case SINGLE_REQUESTED:
+            case REQ_SINGLE:
                 respond = new RequestHandler().askForSingle(getConId(), msg.getReceptor(), msg.getBody());
                 writeMessage(respond);
                 break;
@@ -57,26 +56,6 @@ public class ClientChannel extends Connection {
 
             case REQ_EXIT_SINGLE:
                 new RequestHandler().exitSigle(getConId(), msg.getReceptor());
-                break;
-
-            case NEW_CHAT:
-
-                break;
-
-            case SHOW_ALL_CHATS:
-
-                break;
-
-            case START_CHAT:
-
-                break;
-
-            case ADD_MEMBER:
-
-                break;
-
-            case TO_CHAT:
-
                 break;
         }
     }
@@ -113,7 +92,7 @@ public class ClientChannel extends Connection {
 
         setConId(Thread.currentThread().getId());
         setNick(presentation.getEmisor());
-        if (presentation.getAction().equals(PRESENT)) {
+        if (presentation.getAction().equals(REQ_PRESENT)) {
             System.out.println("[" + presentation.getEmisor() + "] IS ACCEPTED");
             return true;
         } else {

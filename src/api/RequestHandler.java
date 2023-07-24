@@ -3,14 +3,14 @@ package api;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import com.ApiCodes;
 import com.Msg;
 import com.Msg.MsgType;
-import com.RequestCodes;
 
 import controller.Server;
 import controller.connection.ClientChannel;
 
-public class RequestHandler implements RequestCodes {
+public class RequestHandler implements ApiCodes {
 
     private Server server = Server.getInstance();
 
@@ -53,7 +53,7 @@ public class RequestHandler implements RequestCodes {
 
         Msg respond = new Msg(MsgType.REQUEST);
 
-        respond.setAction(REQ_SHOW_ALL_ONLINE);
+        respond.setAction(REQ_SHOW_ALL);
 
         if (allOnline.length > 0) {
             respond.setParameters(allOnline);
