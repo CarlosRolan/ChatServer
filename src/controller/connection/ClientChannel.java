@@ -3,11 +3,10 @@ package controller.connection;
 import java.io.IOException;
 import java.net.Socket;
 
-import com.Connection;
-import com.Msg;
-import com.Msg.MsgType;
+import com.comunication.Connection;
+import com.comunication.Msg;
+import com.comunication.Msg.MsgType;
 
-import api.RequestHandler;
 import controller.Server;
 import log.ClientLog;
 
@@ -23,41 +22,6 @@ public class ClientChannel extends Connection {
     public ClientChannel(Socket socket) {
         super(socket);
         cLog = new ClientLog(this);
-    }
-
-    public void handleRequest(Msg msg) {
-
-        Msg respond = null;
-
-        switch (msg.getAction()) {
-
-            case REQ_SHOW_ALL:
-                respond = new RequestHandler().showOnlineUsers(this);
-                writeMessage(respond);
-                break;
-
-            case REQ_SINGLE:
-                respond = new RequestHandler().askForSingle(getConId(), msg.getReceptor(), msg.getBody());
-                writeMessage(respond);
-                break;
-
-            case REQ_ALLOW:
-                respond = new RequestHandler().allowSingleChat(msg.getReceptor(), getConId(), getNick());
-                writeMessage(respond);
-                break;
-
-            case REQ_DENY:
-
-                break;
-
-            case MSG_SINGLE_MSG:
-                new RequestHandler().sendSingleMsg(msg.getEmisor(), msg.getReceptor(), msg.getBody());
-                break;
-
-            case REQ_EXIT_SINGLE:
-                new RequestHandler().exitSigle(getConId(), msg.getReceptor());
-                break;
-        }
     }
 
     @Override
@@ -86,6 +50,28 @@ public class ClientChannel extends Connection {
         }
     }
 
+    @Override
+    public void run() {
+        if (recievePresentation()) {
+            Server.getInstance().registerConnection(this);
+            sendComfirmation();
+            try {
+                while (true) {
+                    Msg msg = readMessage();
+                    Server.getInstance().handleRequest(msg, this);
+                }
+            } catch (Exception e) {
+                System.out.println(e.getClass());
+                System.out.println(
+                        INFO_CONNECTION_CLOSED + " [" + getNick() + "]");
+                Server.getInstance().deleteConnection(this);
+                cLog.logOut();
+            }
+
+        }
+
+    }
+
     private boolean recievePresentation() {
         Msg presentation;
         presentation = readMessage();
@@ -106,28 +92,6 @@ public class ClientChannel extends Connection {
         comfirmation.setReceptor(getConId());
         System.out.println("SENDING COMFIRMATION TO [" + comfirmation.getReceptor() + "]");
         writeMessage(comfirmation);
-
-    }
-
-    @Override
-    public void run() {
-        if (recievePresentation()) {
-            Server.getInstance().registerConnection(this);
-            sendComfirmation();
-            try {
-                while (true) {
-                    Msg msg = readMessage();
-                    handleRequest(msg);
-                }
-            } catch (Exception e) {
-                System.out.println(e.getClass());
-                System.out.println(
-                        INFO_CONNECTION_CLOSED + " [" + getNick() + "]");
-                Server.getInstance().deleteConnection(this);
-                cLog.logOut();
-            }
-
-        }
 
     }
 

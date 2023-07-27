@@ -1,6 +1,7 @@
 bin
 backups
 logs
+docs
 .classpath
 .project
 .editorconfig

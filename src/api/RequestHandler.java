@@ -3,12 +3,13 @@ package api;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import com.ApiCodes;
-import com.Msg;
-import com.Msg.MsgType;
+import com.chat.Chat;
+import com.comunication.ApiCodes;
+import com.comunication.Connection;
+import com.comunication.Msg;
+import com.comunication.Msg.MsgType;
 
 import controller.Server;
-import controller.connection.ClientChannel;
 
 public class RequestHandler implements ApiCodes {
 
@@ -38,11 +39,11 @@ public class RequestHandler implements ApiCodes {
         System.out.println("Solo soy un gusano");
     }
 
-    public Msg showOnlineUsers(ClientChannel cc) {
+    public Msg showOnlineUsers(Connection cc) {
         String[] allOnline = new String[server.getNumberOfOnlineUsers() - 1];
         int i = 0;
 
-        for (ClientChannel iter : server.getOnlineCon()) {
+        for (Connection iter : server.getOnlineCon()) {
             if (!iter.getConId().equals(cc.getConId()) && !iter.getNick().equals(cc.getNick())) {
                 System.out.println(iter.getNick());
                 allOnline[i] = "[" + iter.getConId() + "]-" + iter.getNick();
@@ -53,7 +54,7 @@ public class RequestHandler implements ApiCodes {
 
         Msg respond = new Msg(MsgType.REQUEST);
 
-        respond.setAction(REQ_SHOW_ALL);
+        respond.setAction(REQ_SHOW_ALL_CON);
 
         if (allOnline.length > 0) {
             respond.setParameters(allOnline);
@@ -68,7 +69,7 @@ public class RequestHandler implements ApiCodes {
         Msg respond = null;
         Msg toCandidate = null;
         System.out.println("ID CANDIDATE [" + candidateId + "]");
-        ClientChannel candidate = server.getClientConnectionById(Integer.valueOf(candidateId));
+        Connection candidate = server.getClientConnectionById(Integer.valueOf(candidateId));
 
         if (candidateId.equals(requesterId)) {
             respond = new Msg(MsgType.ERROR);
@@ -101,7 +102,7 @@ public class RequestHandler implements ApiCodes {
         Msg toRequester = new Msg(MsgType.REQUEST);
 
         // the requester is waiting for the respond at the moment
-        ClientChannel requester = server.getClientConnectionById(Integer.parseInt(requesterId));
+        Connection requester = server.getClientConnectionById(Integer.parseInt(requesterId));
 
         toRequester.setAction(REQ_START_SINGLE);
         toRequester.setEmisor(requesterId);
@@ -120,7 +121,7 @@ public class RequestHandler implements ApiCodes {
 
     public void sendSingleMsg(String emisorId, String receptorId, String text) {
 
-        ClientChannel receptor = server.getClientConnectionById(Integer.parseInt(receptorId));
+        Connection receptor = server.getClientConnectionById(Integer.parseInt(receptorId));
 
         Msg directMsg = new Msg(MsgType.MESSAGE);
 
@@ -132,7 +133,7 @@ public class RequestHandler implements ApiCodes {
     }
 
     public void exitSigle(String emisorId, String receptorId) {
-        ClientChannel receptor = server.getClientConnectionById(Integer.parseInt(receptorId));
+        Connection receptor = server.getClientConnectionById(Integer.parseInt(receptorId));
 
         Msg exitSingle = new Msg(MsgType.REQUEST);
 
@@ -141,6 +142,23 @@ public class RequestHandler implements ApiCodes {
         exitSingle.setReceptor(receptorId);
 
         receptor.writeMessage(exitSingle);
+    }
+
+    public Msg showAllChats(String emisorId) {
+
+        String[] chats = new String[server.getAllChats().size()];
+        int i = 0;
+
+        for (Chat iter : server.getAllChats()) {
+            chats[i] = "[" + iter.getChatId() + "]" + iter.getTitle() + "-" + iter.getDescription();
+        }
+
+        Msg respond = new Msg(MsgType.REQUEST);
+
+        respond.setAction(REQ_SHOW_ALL_CHAT);
+
+        return respond;
+
     }
 
 }
