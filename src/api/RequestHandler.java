@@ -39,12 +39,12 @@ public class RequestHandler implements ApiCodes {
         System.out.println("Solo soy un gusano");
     }
 
-    public Msg showOnlineUsers(Connection cc) {
+    public Msg showOnlineUsers(String emisorId) {
         String[] allOnline = new String[server.getNumberOfOnlineUsers() - 1];
         int i = 0;
 
         for (Connection iter : server.getOnlineCon()) {
-            if (!iter.getConId().equals(cc.getConId()) && !iter.getNick().equals(cc.getNick())) {
+            if (!iter.getConId().equals(emisorId)) {
                 System.out.println(iter.getNick());
                 allOnline[i] = "[" + iter.getConId() + "]-" + iter.getNick();
                 System.out.println(allOnline[i]);
@@ -59,7 +59,8 @@ public class RequestHandler implements ApiCodes {
         if (allOnline.length > 0) {
             respond.setParameters(allOnline);
         } else if (allOnline.length == 0) {
-            respond.setParameter(0, "You are the only user ONLINE");
+            String[] parameters = { "You are the only user ONLINE" };
+            respond.setParameters(parameters);
         }
 
         return respond;
@@ -68,6 +69,7 @@ public class RequestHandler implements ApiCodes {
     public Msg askForSingle(String requesterId, String candidateId, String requesterNick) {
         Msg respond = null;
         Msg toCandidate = null;
+        String[] parameters = new String[1];
         System.out.println("ID CANDIDATE [" + candidateId + "]");
         Connection candidate = server.getClientConnectionById(Integer.valueOf(candidateId));
 
@@ -75,19 +77,23 @@ public class RequestHandler implements ApiCodes {
             respond = new Msg(MsgType.ERROR);
             respond.setAction(ERROR_SELF_REFERENCE);
         } else if (candidate != null) {
+
             // to candidate
+            parameters[0] = requesterNick;
             toCandidate = new Msg(MsgType.REQUEST);
             toCandidate.setAction(REQ_ASKED_FOR_PERMISSION);
             toCandidate.setEmisor(requesterId);
             toCandidate.setReceptor(String.valueOf(candidateId));
-            toCandidate.setParameter(0, requesterNick);
+            toCandidate.setParameters(parameters);
             candidate.writeMessage(toCandidate);
+
             // to requester
+            parameters[0] = requesterNick;
             respond = new Msg(MsgType.REQUEST);
             respond.setAction(REQ_WAITING_FOR_PERMISSION);
             respond.setEmisor(candidateId);
             respond.setReceptor(requesterId);
-            respond.setParameter(0, candidate.getNick());
+            respond.setParameters(parameters);
             respond.setBody(requesterNick + " waiting for " + candidate.getNick());
         } else {
             respond = new Msg(MsgType.ERROR);
@@ -100,6 +106,7 @@ public class RequestHandler implements ApiCodes {
     public Msg allowSingleChat(String requesterId, String requestedId, String requestedNick) {
         Msg respond = new Msg(MsgType.REQUEST);
         Msg toRequester = new Msg(MsgType.REQUEST);
+        String[] parameters = new String[1];
 
         // the requester is waiting for the respond at the moment
         Connection requester = server.getClientConnectionById(Integer.parseInt(requesterId));
@@ -107,14 +114,16 @@ public class RequestHandler implements ApiCodes {
         toRequester.setAction(REQ_START_SINGLE);
         toRequester.setEmisor(requesterId);
         toRequester.setReceptor(requestedId);
-        toRequester.setParameter(0, requestedNick);
+        parameters[0] = requestedNick;
+        toRequester.setParameters(parameters);
 
         requester.writeMessage(toRequester);
 
         respond.setAction(REQ_START_SINGLE);
         respond.setEmisor(requestedId);
         respond.setReceptor(requesterId);
-        respond.setParameter(0, requester.getNick());
+        parameters[0] = requester.getNick();
+        toRequester.setParameters(parameters);
 
         return respond;
     }
@@ -144,21 +153,35 @@ public class RequestHandler implements ApiCodes {
         receptor.writeMessage(exitSingle);
     }
 
-    public Msg showAllChats(String emisorId) {
-
+    public Msg showAllChats() {
+        Msg respond = new Msg(MsgType.REQUEST);
         String[] chats = new String[server.getAllChats().size()];
+        respond.setAction(REQ_SHOW_ALL_CHAT);
         int i = 0;
 
         for (Chat iter : server.getAllChats()) {
             chats[i] = "[" + iter.getChatId() + "]" + iter.getTitle() + "-" + iter.getDescription();
+            respond.setParameter(i, chats[i]);
         }
-
-        Msg respond = new Msg(MsgType.REQUEST);
-
-        respond.setAction(REQ_SHOW_ALL_CHAT);
 
         return respond;
 
+    }
+
+    public Msg createNewChat(Msg msg) {
+
+        Chat chat = Chat.createChatAsAdmin(msg);
+
+        server.registerChat(chat);
+
+        Msg respond = new Msg(MsgType.REQUEST);
+        respond.setAction(REQ_INIT_CHAT);
+        respond.setEmisor(msg.getEmisor());
+        respond.setReceptor(msg.getParameter(0));
+        respond.setBody(msg.getParameter(1));
+        respond.setParameters(chat.getmembersToString());
+
+        return respond;
     }
 
 }

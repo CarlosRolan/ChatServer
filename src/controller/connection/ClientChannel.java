@@ -57,10 +57,12 @@ public class ClientChannel extends Connection {
             sendComfirmation();
             try {
                 while (true) {
-                    Msg msg = readMessage();
-                    Server.getInstance().handleRequest(msg, this);
+                    Msg msgFromClient = readMessage();
+                    Msg msgResponse = Server.getInstance().handleRequest(msgFromClient);
+                    writeMessage(msgResponse);
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 System.out.println(e.getClass());
                 System.out.println(
                         INFO_CONNECTION_CLOSED + " [" + getNick() + "]");

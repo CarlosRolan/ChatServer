@@ -2,6 +2,8 @@ bin
 backups
 logs
 docs
+lib
 .classpath
 .project
 .editorconfig
+.vscode

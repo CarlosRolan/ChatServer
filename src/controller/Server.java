@@ -89,26 +89,26 @@ public class Server implements Enviroment, ApiCodes {
 		return null;
 	}
 
-	public void handleRequest(Msg msg, Connection currentClient) {
+	public Msg handleRequest(Msg msg) {
 
 		Msg respond = null;
 
 		switch (msg.getAction()) {
 
 			case REQ_SHOW_ALL_CON:
-				respond = new RequestHandler().showOnlineUsers(currentClient);
+				respond = new RequestHandler().showOnlineUsers(msg.getEmisor());
 				break;
 
 			case REQ_SHOW_ALL_CHAT:
-				respond = new RequestHandler().showAllChats(currentClient.getConId());
+				respond = new RequestHandler().showAllChats();
 				break;
 
 			case REQ_SINGLE:
-				respond = new RequestHandler().askForSingle(currentClient.getConId(), msg.getReceptor(), msg.getBody());
+				respond = new RequestHandler().askForSingle(msg.getEmisor(), msg.getReceptor(), msg.getBody());
 				break;
 
 			case REQ_ALLOW:
-				respond = new RequestHandler().allowSingleChat(msg.getReceptor(), currentClient.getConId(), currentClient.getNick());
+				respond = new RequestHandler().allowSingleChat(msg.getReceptor(), msg.getEmisor(), msg.getBody());
 				break;
 
 			case MSG_SINGLE_MSG:
@@ -116,15 +116,13 @@ public class Server implements Enviroment, ApiCodes {
 				break;
 
 			case REQ_EXIT_SINGLE:
-				new RequestHandler().exitSigle(currentClient.getConId(), msg.getReceptor());
+				new RequestHandler().exitSigle(msg.getEmisor(), msg.getReceptor());
 				break;
 
-			case REQ_CHAT:
+			case REQ_CREATE_CHAT:
+				respond = new RequestHandler().createNewChat(msg);
 				break;
 		}
-
-		if (respond != null) {
-			currentClient.writeMessage(respond);
-		}
+		return respond;
 	}
 }
