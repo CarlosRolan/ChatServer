@@ -26,9 +26,11 @@ public class ClientChannel extends Connection {
 
     @Override
     public void writeMessage(Msg msg) {
-        System.out.println(getConId() + getNick());
-        System.out.println("OUT==>" + msg.toString());
-        super.writeMessage(msg);
+        if (msg != null) {
+            System.out.println(getConId() + getNick());
+            System.out.println("OUT==>" + msg.toString());
+            super.writeMessage(msg);
+        }
     }
 
     @Override

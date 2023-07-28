@@ -48,12 +48,20 @@ public class Server implements Enviroment, ApiCodes {
 		}
 	}
 
-	public List<Connection> getOnlineCon() {
+	public List<Connection> getAllConnections() {
 		return allOnlineCon;
 	}
 
 	public List<Chat> getAllChats() {
 		return allChats;
+	}
+
+	public Connection getConnection(int conId) {
+		return allOnlineCon.get(conId);
+	}
+
+	public Connection getConnection(String conId) {
+		return allOnlineCon.get(Integer.parseInt(conId));
 	}
 
 	public void registerConnection(Connection c) {
@@ -62,6 +70,14 @@ public class Server implements Enviroment, ApiCodes {
 
 	public void deleteConnection(Connection c) {
 		allOnlineCon.remove(c);
+	}
+
+	public Chat getChat(int chatId) {
+		return allChats.get(chatId);
+	}
+
+	public Chat getChat(String position) {
+		return allChats.get(Integer.parseInt(position));
 	}
 
 	public void registerChat(Chat chat) {
@@ -120,7 +136,12 @@ public class Server implements Enviroment, ApiCodes {
 				break;
 
 			case REQ_CREATE_CHAT:
-				respond = new RequestHandler().createNewChat(msg);
+				Chat chat = Chat.createChatAsAdmin(msg);
+				registerChat(chat);
+				respond = new RequestHandler().sendChatInstance(chat);
+				break;
+			case REQ_CHAT:
+				respond = new RequestHandler().sendChatInstance(getChat(msg.getReceptor()));
 				break;
 		}
 		return respond;
