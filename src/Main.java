@@ -11,7 +11,7 @@ public class Main {
 		RequestHandler.newRequest("simpleMethod");
 		ClientChannel cc;
 		while (true) {
-			cc = new ClientChannel(server.listenConnections());
+			cc = server.initChannel(server.listenConnections());
 			cc.start();
 		}
 	}

@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import controller.connection.ClientChannel;
+import com.comunication.Connection;
 
 public final class ClientLog {
 
@@ -16,7 +16,7 @@ public final class ClientLog {
     private String mUser;
     private boolean isNewFile = true;
 
-    public ClientLog(ClientChannel cc) {
+    public ClientLog(Connection cc) {
         mUser = cc.getNick();
 
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd_MM_yyyy");

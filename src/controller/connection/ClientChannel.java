@@ -1,11 +1,16 @@
 package controller.connection;
 
-import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.chat.Chat;
+import com.chat.Member;
 import com.comunication.Connection;
-import com.comunication.Msg;
-import com.comunication.Msg.MsgType;
+import com.comunication.MSG;
+import com.comunication.MSG.Type;
+import com.comunication.handlers.IMSGHandler;
+import com.comunication.handlers.IPKGHandler;
 
 import controller.Server;
 import log.ClientLog;
@@ -14,42 +19,14 @@ public class ClientChannel extends Connection {
 
     private ClientLog cLog;
 
-    public ClientChannel(String nick) {
-        super(nick);
+    public ClientChannel(String nick, IMSGHandler msgHandler, IPKGHandler pckgHandler) {
+        super(nick, msgHandler, pckgHandler);
         cLog = new ClientLog(this);
     }
 
-    public ClientChannel(Socket socket) {
-        super(socket);
+    public ClientChannel(Socket socket, IMSGHandler msgHandler, IPKGHandler pckgHandler) {
+        super(socket, msgHandler, pckgHandler);
         cLog = new ClientLog(this);
-    }
-
-    @Override
-    public void writeMessage(Msg msg) {
-        if (msg != null) {
-            System.out.println(getConId() + getNick());
-            System.out.println("OUT==>" + msg.toString());
-            super.writeMessage(msg);
-        }
-    }
-
-    @Override
-    public Msg readMessage() {
-        try {
-            Msg msg = (Msg) getOis().readObject();
-            System.out.println("<==IN " + msg.toString());
-            return msg;
-        } catch (NullPointerException e) {
-            System.out.println("NullPointerException");
-            return null;
-        } catch (ClassNotFoundException e) {
-            System.out.println("ClassNotFoundException");
-            return null;
-        } catch (IOException e) {
-            System.out.println("IOException");
-            System.err.println("[" + getNick() + "] HAS LEFT");
-            return null;
-        }
     }
 
     @Override
@@ -59,25 +36,27 @@ public class ClientChannel extends Connection {
             sendComfirmation();
             try {
                 while (true) {
-                    Msg msgFromClient = readMessage();
-                    Msg msgResponse = Server.getInstance().handleRequest(msgFromClient);
-                    writeMessage(msgResponse);
+                    /* FROM CLIENT */
+                    listen();
+
+                    write(Server.getInstance().respond);
+
                 }
             } catch (Exception e) {
                 e.printStackTrace();
                 System.out.println(e.getClass());
+                System.out.println("IOException");
+                System.err.println("[" + getNick() + "] HAS LEFT");
                 System.out.println(
                         INFO_CONNECTION_CLOSED + " [" + getNick() + "]");
                 Server.getInstance().deleteConnection(this);
                 cLog.logOut();
             }
-
         }
-
     }
 
     private boolean recievePresentation() {
-        Msg presentation;
+        MSG presentation;
         presentation = readMessage();
 
         setConId(Thread.currentThread().getId());
@@ -91,12 +70,23 @@ public class ClientChannel extends Connection {
     }
 
     private void sendComfirmation() {
-        Msg comfirmation = new Msg(MsgType.REQUEST);
+        MSG comfirmation = new MSG(Type.REQUEST);
         comfirmation.setAction(INFO_PRESENTATION_SUCCES);
         comfirmation.setReceptor(getConId());
         System.out.println("SENDING COMFIRMATION TO [" + comfirmation.getReceptor() + "]");
-        writeMessage(comfirmation);
+        write(comfirmation);
+    }
 
+    public List<Chat> getChats() {
+        List<Chat> chatsParticipated = new ArrayList<>();
+        for (Chat chat : Server.getInstance().getAllChats()) {
+            for (Member member : chat.getMembers()) {
+                if (member.getConnectionId().equals(getConId())) {
+                    chatsParticipated.add(chat);
+                }
+            }
+        }
+        return chatsParticipated;
     }
 
 }

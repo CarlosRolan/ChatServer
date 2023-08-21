@@ -2,12 +2,15 @@ package api;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import com.chat.Chat;
+import com.chat.Member;
 import com.comunication.ApiCodes;
 import com.comunication.Connection;
-import com.comunication.Msg;
-import com.comunication.Msg.MsgType;
+import com.comunication.MSG;
+import com.comunication.PKG;
 
 import controller.Server;
 
@@ -39,7 +42,7 @@ public class RequestHandler implements ApiCodes {
         System.out.println("Solo soy un gusano");
     }
 
-    public Msg showOnlineUsers(String emisorId) {
+    public MSG showOnlineUsers(String emisorId) {
         String[] allOnline = new String[server.getNumberOfOnlineUsers() - 1];
         int i = 0;
 
@@ -52,7 +55,7 @@ public class RequestHandler implements ApiCodes {
             }
         }
 
-        Msg respond = new Msg(MsgType.REQUEST);
+        MSG respond = new MSG(MSG.Type.REQUEST);
 
         respond.setAction(REQ_SHOW_ALL_CON);
 
@@ -65,54 +68,64 @@ public class RequestHandler implements ApiCodes {
         return respond;
     }
 
-    public Msg askForSingle(String requesterId, String candidateId, String requesterNick) {
-        Msg respond = null;
-        Msg toCandidate = null;
+    public MSG showAllMemberOfChat(Chat selected) {
+        MSG respond = new MSG(MSG.Type.REQUEST);
+
+        respond.setAction(REQ_SHOW_ALL_MEMBERS_OF_CHAT);
+        respond.setParameters(selected.getmembersToString());
+
+        return respond;
+
+    }
+
+    public MSG askForSingle(String requesterId, String candidateId, String requesterNick) {
+        MSG respond = null;
+        MSG toCandidate = null;
 
         System.out.println("ID CANDIDATE [" + candidateId + "]");
-        Connection candidate = server.getConnection(candidateId);
+        Connection candidate = server.getConnectionById(candidateId);
 
         if (candidateId.equals(requesterId)) {
-            respond = new Msg(MsgType.ERROR);
+            respond = new MSG(MSG.Type.ERROR);
             respond.setAction(ERROR_SELF_REFERENCE);
         } else if (candidate != null) {
 
             // to candidate
-            toCandidate = new Msg(MsgType.REQUEST);
+            toCandidate = new MSG(MSG.Type.REQUEST);
             toCandidate.setAction(REQ_ASKED_FOR_PERMISSION);
             toCandidate.setEmisor(requesterId);
             toCandidate.setReceptor(String.valueOf(candidateId));
             toCandidate.setParameter(0, requesterNick);
-            candidate.writeMessage(toCandidate);
+            candidate.write(toCandidate);
 
             // to requester
-            respond = new Msg(MsgType.REQUEST);
+            respond = new MSG(MSG.Type.REQUEST);
             respond.setAction(REQ_WAITING_FOR_PERMISSION);
             respond.setEmisor(candidateId);
             respond.setReceptor(requesterId);
             respond.setParameter(0, candidate.getNick());
             respond.setBody(requesterNick + " waiting for " + candidate.getNick());
         } else {
-            respond = new Msg(MsgType.ERROR);
+            respond = new MSG(MSG.Type.ERROR);
             respond.setAction(ERROR_CLIENT_NOT_FOUND);
         }
 
         return respond;
     }
 
-    public Msg allowSingleChat(String requesterId, String requestedId, String requestedNick) {
-        Msg respond = new Msg(MsgType.REQUEST);
-        Msg toRequester = new Msg(MsgType.REQUEST);
+    public MSG allowSingleChat(String requesterId, String requestedId, String requestedNick) {
+        MSG respond = new MSG(MSG.Type.REQUEST);
+        MSG toRequester = new MSG(MSG.Type.REQUEST);
 
         // the requester is waiting for the respond at the moment
-        Connection requester = server.getConnection(requesterId);
+        Connection requester = server.getConnectionById(requesterId);
 
         toRequester.setAction(REQ_START_SINGLE);
         toRequester.setEmisor(requesterId);
         toRequester.setReceptor(requestedId);
         toRequester.setParameter(0, requestedNick);
 
-        requester.writeMessage(toRequester);
+        requester.write(toRequester);
 
         respond.setAction(REQ_START_SINGLE);
         respond.setEmisor(requestedId);
@@ -124,55 +137,112 @@ public class RequestHandler implements ApiCodes {
 
     public void sendSingleMsg(String emisorId, String receptorId, String text) {
 
-        Connection receptor = server.getConnection(receptorId);
+        Connection receptor = server.getConnectionById(receptorId);
 
-        Msg directMsg = new Msg(MsgType.MESSAGE);
+        MSG directMSG = new MSG(MSG.Type.MESSAGE);
 
-        directMsg.setAction(MSG_SINGLE_MSG);
-        directMsg.setEmisor(emisorId);
-        directMsg.setReceptor(receptorId);
-        directMsg.setBody(text);
+        directMSG.setAction(MSG_TO_SINGLE);
+        directMSG.setEmisor(emisorId);
+        directMSG.setReceptor(receptorId);
+        directMSG.setBody(text);
 
-        receptor.writeMessage(directMsg);
+        receptor.write(directMSG);
+    }
+
+    public void sendMsgToChat(Chat selectedChat, String emisorId, String emisorNick, String text) {
+        MSG toChat = new MSG(MSG.Type.MESSAGE);
+
+        toChat.setAction(MSG_TO_CHAT);
+        toChat.setEmisor(emisorId);
+        toChat.setParameter(0, emisorNick);
+        toChat.setBody(text);
+
+        for (Member iMember : selectedChat.getMembers()) {
+            Connection memberCon = Server.getInstance().getConnectionById(iMember.getConnectionId());
+            memberCon.write(toChat);
+        }
     }
 
     public void exitSigle(String emisorId, String receptorId) {
-        Connection receptor = server.getConnection(receptorId);
+        Connection receptor = server.getConnectionById(receptorId);
 
-        Msg exitSingle = new Msg(MsgType.REQUEST);
+        MSG exitSingle = new MSG(MSG.Type.REQUEST);
 
         exitSingle.setAction(REQ_EXIT_SINGLE);
         exitSingle.setEmisor(emisorId);
         exitSingle.setReceptor(receptorId);
 
-        receptor.writeMessage(exitSingle);
+        receptor.write(exitSingle);
     }
 
-    public Msg showAllChats() {
-        Msg respond = new Msg(MsgType.REQUEST);
+    public MSG showAllChats() {
+        MSG respond = new MSG(MSG.Type.REQUEST);
         String[] chats = new String[server.getNumberOfChats()];
         respond.setAction(REQ_SHOW_ALL_CHAT);
         int i = 0;
 
-        for (Chat iter : server.getAllChats()) {
-            chats[i] = "[" + iter.getChatId() + "]" + iter.getTitle() + "-" + iter.getDescription();
-            respond.setParameter(i, chats[i]);
+        if (chats.length >= 1) {
+            for (Chat iter : server.getAllChats()) {
+                chats[i] = "[" + iter.getChatId() + "]" + iter.getTitle() + "-" + iter.getDescription();
+                respond.setParameter(i, chats[i]);
+            }
+        } else {
+            respond.setParameter(0, "You do not have any chat yet");
         }
 
         return respond;
 
     }
 
-    public Msg sendChatInstance(Chat chat) {
-
-        Msg respond = new Msg(MsgType.REQUEST);
-        respond.setAction(REQ_INIT_CHAT);
-        respond.setEmisor(chat.getChatId());
-        respond.setReceptor(chat.getTitle());
-        respond.setBody(chat.getDescription());
-        respond.setParameters(chat.getmembersToString());
+    // To update or send the new chatCreated
+    public MSG sendChatInstance(Chat chat) {
+        MSG respond = null;
+        if (chat != null) {
+            respond = new MSG(MSG.Type.REQUEST);
+            respond.setAction(REQ_INIT_CHAT);
+            respond.setEmisor(chat.getChatId());
+            respond.setReceptor(chat.getTitle());
+            respond.setBody(chat.getDescription());
+            respond.setParameters(chat.getmembersToString());
+        } else {
+            respond = new MSG(MSG.Type.ERROR);
+            respond.setAction(ERROR_CHAT_NOT_FOUND);
+        }
 
         return respond;
+    }
+
+    public PKG sendUpdatedChats(String emisorId) {
+        PKG stateUpdated = new PKG(PKG.Type.COLLECTION);
+
+        for (Chat iChat : server.getAllChats()) {
+            for (Member iMeber : iChat.getMembers()) {
+                if (iMeber.getConnectionId().equals(emisorId)) {
+                    MSG chatInstance = sendChatInstance(iChat);
+                    stateUpdated.addMsg(chatInstance);
+                }
+            }
+        }
+
+        return stateUpdated;
+    }
+
+    public PKG sendUpdatedClients(String emisorId) {
+
+        PKG updatedState = new PKG(PKG.Type.COLLECTION);
+
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
+        LocalDateTime now = LocalDateTime.now();
+
+        for (Connection iCon : server.getAllConnections()) {
+            MSG msgCon = new MSG(MSG.Type.REQUEST);
+            msgCon.setAction("CON_INFO");
+            msgCon.setEmisor(dtf.format(now));
+            msgCon.setBody(iCon.getConId() + "_" + iCon.getNick());
+            updatedState.addMsg(msgCon);
+        }
+        return updatedState;
+
     }
 
 }
