@@ -30,6 +30,7 @@ public final class ClientLog {
             f.createNewFile();
             f.setWritable(true);
             fw = new FileWriter(f, true);
+            logIn();
         } catch (IOException e) {
             e.printStackTrace();
         }
