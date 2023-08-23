@@ -42,9 +42,15 @@ public class Server implements Enviroment, ApiCodes {
 	public final IMSGHandler pMSG_HANDLER = new IMSGHandler() {
 
 		@Override
-		public void handleError(MSG arg0) {
-			// TODO Auto-generated method stub
-			throw new UnsupportedOperationException("Unimplemented method 'handleError'");
+		public void handleError(MSG error) {
+			respond = null;
+
+			switch (error.getAction()) {
+				default:
+					System.out.println(WARN_UNHANDLED_MSG_ERROR);
+					break;
+			}
+
 		}
 
 		@Override
@@ -56,9 +62,14 @@ public class Server implements Enviroment, ApiCodes {
 				case MSG_TO_SINGLE:
 					new RequestHandler().sendSingleMsg(msg.getEmisor(), msg.getReceptor(), msg.getBody());
 					break;
+
 				case MSG_TO_CHAT:
 					Chat chat = getChatById(msg.getReceptor());
 					new RequestHandler().sendMsgToChat(chat, msg.getEmisor(), msg.getParameter(0), msg.getBody());
+					break;
+
+				default:
+					System.err.println(WARN_UNHANDLED_MSG_MESSAGE);
 					break;
 			}
 
@@ -87,7 +98,8 @@ public class Server implements Enviroment, ApiCodes {
 					break;
 
 				case REQ_ALLOW:
-					respond = new RequestHandler().allowSingleChat(msg.getReceptor(), msg.getEmisor(), msg.getBody());
+					respond = new RequestHandler().allowSingleChat(msg.getReceptor(), msg.getEmisor(),
+							msg.getBody());
 					break;
 
 				case REQ_EXIT_SINGLE:
@@ -106,7 +118,7 @@ public class Server implements Enviroment, ApiCodes {
 					break;
 
 				case REQ_UPDATE_STATE:
-					respond = new RequestHandler().sendUpdatedClients(msg.getEmisor());
+					respond = new RequestHandler().sendStateUpdate(msg.getEmisor());
 					break;
 
 				case REQ_ADD_MEMBER:
@@ -114,9 +126,12 @@ public class Server implements Enviroment, ApiCodes {
 					Connection selectedCon = getConnectionById(msg.getReceptor());
 					Member newMember = Member.newMember(selectedCon, msg.getParameter(0));
 					chatToAdd.addMember(newMember);
-					// TODO UpdateCHats
-					new RequestHandler().sendChatInstance(chatToAdd);
+					respond = new RequestHandler().sendChatInstance(chatToAdd);
+					break;
 
+				default:
+					System.err.println(WARN_UNHANDLED_MSG_REQUEST);
+					break;
 			}
 
 		}
@@ -169,18 +184,6 @@ public class Server implements Enviroment, ApiCodes {
 
 	public void deleteConnection(Connection c) {
 		allOnlineCon.remove(c);
-	}
-
-	public Chat getChat(int chatId) {
-		return allChats.get(chatId);
-	}
-
-	public Chat getChat(String position) {
-		try {
-			return allChats.get(Integer.parseInt(position));
-		} catch (IndexOutOfBoundsException e) {
-			return null;
-		}
 	}
 
 	public Chat getChatById(String chatId) {

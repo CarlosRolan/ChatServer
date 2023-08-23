@@ -1,7 +1,9 @@
 package api;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.SocketException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -96,7 +98,15 @@ public class RequestHandler implements ApiCodes {
             toCandidate.setEmisor(requesterId);
             toCandidate.setReceptor(String.valueOf(candidateId));
             toCandidate.setParameter(0, requesterNick);
-            candidate.write(toCandidate);
+            try {
+                candidate.write(toCandidate);
+            } catch (SocketException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
 
             // to requester
             respond = new MSG(MSG.Type.REQUEST);
@@ -125,7 +135,15 @@ public class RequestHandler implements ApiCodes {
         toRequester.setReceptor(requestedId);
         toRequester.setParameter(0, requestedNick);
 
-        requester.write(toRequester);
+        try {
+            requester.write(toRequester);
+        } catch (SocketException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         respond.setAction(REQ_START_SINGLE);
         respond.setEmisor(requestedId);
@@ -146,7 +164,15 @@ public class RequestHandler implements ApiCodes {
         directMSG.setReceptor(receptorId);
         directMSG.setBody(text);
 
-        receptor.write(directMSG);
+        try {
+            receptor.write(directMSG);
+        } catch (SocketException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     public void sendMsgToChat(Chat selectedChat, String emisorId, String emisorNick, String text) {
@@ -159,7 +185,15 @@ public class RequestHandler implements ApiCodes {
 
         for (Member iMember : selectedChat.getMembers()) {
             Connection memberCon = Server.getInstance().getConnectionById(iMember.getConnectionId());
-            memberCon.write(toChat);
+            try {
+                memberCon.write(toChat);
+            } catch (SocketException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
     }
 
@@ -172,7 +206,15 @@ public class RequestHandler implements ApiCodes {
         exitSingle.setEmisor(emisorId);
         exitSingle.setReceptor(receptorId);
 
-        receptor.write(exitSingle);
+        try {
+            receptor.write(exitSingle);
+        } catch (SocketException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     public MSG showAllChats() {
@@ -212,35 +254,29 @@ public class RequestHandler implements ApiCodes {
         return respond;
     }
 
-    public PKG sendUpdatedChats(String emisorId) {
-        PKG stateUpdated = new PKG(PKG.Type.COLLECTION);
+    public PKG sendStateUpdate(String emisorId) {
+        PKG updatedState = new PKG(PKG.Type.COLLECTION);
+        updatedState.setName(COLLECTION_UPDATE);
+
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
+        LocalDateTime now = LocalDateTime.now();
+        for (Connection iCon : server.getAllConnections()) {
+            MSG msgCon = new MSG(MSG.Type.REQUEST);
+            msgCon.setAction(REQ_CON_INFO);
+            msgCon.setEmisor(dtf.format(now));
+            msgCon.setBody(iCon.getConId() + "_" + iCon.getNick());
+            updatedState.addMsg(msgCon);
+        }
 
         for (Chat iChat : server.getAllChats()) {
             for (Member iMeber : iChat.getMembers()) {
                 if (iMeber.getConnectionId().equals(emisorId)) {
                     MSG chatInstance = sendChatInstance(iChat);
-                    stateUpdated.addMsg(chatInstance);
+                    updatedState.addMsg(chatInstance);
                 }
             }
         }
 
-        return stateUpdated;
-    }
-
-    public PKG sendUpdatedClients(String emisorId) {
-
-        PKG updatedState = new PKG(PKG.Type.COLLECTION);
-
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
-        LocalDateTime now = LocalDateTime.now();
-
-        for (Connection iCon : server.getAllConnections()) {
-            MSG msgCon = new MSG(MSG.Type.REQUEST);
-            msgCon.setAction("CON_INFO");
-            msgCon.setEmisor(dtf.format(now));
-            msgCon.setBody(iCon.getConId() + "_" + iCon.getNick());
-            updatedState.addMsg(msgCon);
-        }
         return updatedState;
 
     }

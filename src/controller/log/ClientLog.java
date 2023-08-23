@@ -1,12 +1,10 @@
-package log;
+package controller.log;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-
-import com.comunication.Connection;
 
 public final class ClientLog {
 
@@ -16,8 +14,8 @@ public final class ClientLog {
     private String mUser;
     private boolean isNewFile = true;
 
-    public ClientLog(Connection cc) {
-        mUser = cc.getNick();
+    public ClientLog(String idCon, String nickName) {
+        mUser = idCon + "_" + nickName;
 
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd_MM_yyyy");
         File logsDir = new File("./logs");
