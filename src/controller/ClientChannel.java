@@ -1,4 +1,4 @@
-package controller.connection;
+package controller;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -14,7 +14,6 @@ import com.comunication.MSG.Type;
 import com.comunication.handlers.IMSGHandler;
 import com.comunication.handlers.IPKGHandler;
 
-import controller.Server;
 import controller.log.ClientLog;
 
 public class ClientChannel extends Connection {
@@ -77,6 +76,7 @@ public class ClientChannel extends Connection {
     public ClientChannel(Socket socket, IMSGHandler msgHandler, IPKGHandler pckgHandler) {
         super(socket, msgHandler, pckgHandler);
     }
+
 
     @Override
     public void run() {

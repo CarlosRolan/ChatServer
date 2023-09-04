@@ -3,6 +3,7 @@ package controller;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,8 +17,6 @@ import com.comunication.handlers.IMSGHandler;
 import com.comunication.handlers.IPKGHandler;
 
 import api.RequestHandler;
-import controller.connection.ClientChannel;
-import controller.connection.env.Enviroment;
 
 public class Server implements Enviroment, ApiCodes {
 
@@ -122,11 +121,25 @@ public class Server implements Enviroment, ApiCodes {
 					break;
 
 				case REQ_ADD_MEMBER:
-					Chat chatToAdd = getChatById(msg.getEmisor());
+					Chat updatedChat = getChatById(msg.getEmisor());
 					Connection selectedCon = getConnectionById(msg.getReceptor());
-					Member newMember = Member.newMember(selectedCon, msg.getParameter(0));
-					chatToAdd.addMember(newMember);
-					respond = new RequestHandler().sendChatInstance(chatToAdd);
+					if (selectedCon != null) {
+						Member newMember = Member.newMember(selectedCon, msg.getParameter(0));
+						updatedChat.addMember(newMember);
+						respond = new RequestHandler().sendChatInstance(updatedChat);
+						try {
+							selectedCon.write(respond);
+						} catch (SocketException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					} else {
+						respond = new RequestHandler().sendConInstance(null);
+					}
+
 					break;
 
 				default:

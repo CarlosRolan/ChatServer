@@ -14,6 +14,7 @@ import com.comunication.Connection;
 import com.comunication.MSG;
 import com.comunication.PKG;
 
+import controller.ClientChannel;
 import controller.Server;
 
 public class RequestHandler implements ApiCodes {
@@ -74,7 +75,7 @@ public class RequestHandler implements ApiCodes {
         MSG respond = new MSG(MSG.Type.REQUEST);
 
         respond.setAction(REQ_SHOW_ALL_MEMBERS_OF_CHAT);
-        respond.setParameters(selected.getmembersToString());
+        respond.setParameters(selected.getMembersRef());
 
         return respond;
 
@@ -236,6 +237,7 @@ public class RequestHandler implements ApiCodes {
 
     }
 
+     //TODO make difeerent when created new chat and wehn added
     // To update or send the new chatCreated
     public MSG sendChatInstance(Chat chat) {
         MSG respond = null;
@@ -245,10 +247,28 @@ public class RequestHandler implements ApiCodes {
             respond.setEmisor(chat.getChatId());
             respond.setReceptor(chat.getTitle());
             respond.setBody(chat.getDescription());
-            respond.setParameters(chat.getmembersToString());
+            respond.setParameters(chat.getMembersRef());
         } else {
             respond = new MSG(MSG.Type.ERROR);
             respond.setAction(ERROR_CHAT_NOT_FOUND);
+        }
+
+        return respond;
+    }
+
+    public MSG sendConInstance(ClientChannel con) {
+        MSG respond = null;
+
+        if (con != null) {
+            respond = new MSG(MSG.Type.REQUEST);
+            respond.setAction(REQ_INIT_CON);
+            respond.setEmisor(con.getConId());
+            respond.setReceptor(con.getNick());
+            respond.setParameters(con.getChatsRef());
+
+        } else {
+            respond = new MSG(MSG.Type.ERROR);
+            respond.setAction(ERROR_CLIENT_NOT_FOUND);
         }
 
         return respond;

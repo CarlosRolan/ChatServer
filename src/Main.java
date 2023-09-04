@@ -1,6 +1,6 @@
 import api.RequestHandler;
+import controller.ClientChannel;
 import controller.Server;
-import controller.connection.ClientChannel;
 
 public class Main {
 
