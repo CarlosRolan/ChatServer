@@ -14,7 +14,6 @@ import com.comunication.Connection;
 import com.comunication.MSG;
 import com.comunication.PKG;
 
-import controller.ClientChannel;
 import controller.Server;
 
 public class RequestHandler implements ApiCodes {
@@ -237,7 +236,7 @@ public class RequestHandler implements ApiCodes {
 
     }
 
-     //TODO make difeerent when created new chat and wehn added
+    // TODO make difeerent when created new chat and wehn added
     // To update or send the new chatCreated
     public MSG sendChatInstance(Chat chat) {
         MSG respond = null;
@@ -256,7 +255,7 @@ public class RequestHandler implements ApiCodes {
         return respond;
     }
 
-    public MSG sendConInstance(ClientChannel con) {
+    public MSG sendConInstance(Connection con) {
         MSG respond = null;
 
         if (con != null) {
@@ -265,6 +264,9 @@ public class RequestHandler implements ApiCodes {
             respond.setEmisor(con.getConId());
             respond.setReceptor(con.getNick());
             respond.setParameters(con.getChatsRef());
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
+            LocalDateTime now = LocalDateTime.now();
+            respond.setBody(dtf.format(now));
 
         } else {
             respond = new MSG(MSG.Type.ERROR);
@@ -278,14 +280,11 @@ public class RequestHandler implements ApiCodes {
         PKG updatedState = new PKG(PKG.Type.COLLECTION);
         updatedState.setName(COLLECTION_UPDATE);
 
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
-        LocalDateTime now = LocalDateTime.now();
         for (Connection iCon : server.getAllConnections()) {
-            MSG msgCon = new MSG(MSG.Type.REQUEST);
-            msgCon.setAction(REQ_CON_INFO);
-            msgCon.setEmisor(dtf.format(now));
-            msgCon.setBody(iCon.getConId() + "_" + iCon.getNick());
-            updatedState.addMsg(msgCon);
+            if (!iCon.getConId().equals(emisorId)) {
+                MSG msgCon = sendConInstance(iCon);
+                updatedState.addMsg(msgCon);
+            }
         }
 
         for (Chat iChat : server.getAllChats()) {
