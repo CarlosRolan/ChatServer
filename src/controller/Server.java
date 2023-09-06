@@ -59,7 +59,8 @@ public class Server implements Enviroment, ApiCodes {
 			switch (msg.getAction()) {
 
 				case MSG_TO_SINGLE:
-					new RequestHandler().sendSingleMsg(msg.getEmisor(), msg.getReceptor(), msg.getBody());
+					new RequestHandler().sendSingleMsg(msg.getEmisor(), msg.getParameter(0), msg.getReceptor(),
+							msg.getBody());
 					break;
 
 				case MSG_TO_CHAT:

@@ -153,7 +153,7 @@ public class RequestHandler implements ApiCodes {
         return respond;
     }
 
-    public void sendSingleMsg(String emisorId, String receptorId, String text) {
+    public void sendSingleMsg(String emisorId, String emisorNick, String receptorId, String text) {
 
         Connection receptor = server.getConnectionById(receptorId);
 
@@ -162,6 +162,7 @@ public class RequestHandler implements ApiCodes {
         directMSG.setAction(MSG_TO_SINGLE);
         directMSG.setEmisor(emisorId);
         directMSG.setReceptor(receptorId);
+        directMSG.setParameter(0, emisorNick);
         directMSG.setBody(text);
 
         try {
@@ -290,8 +291,8 @@ public class RequestHandler implements ApiCodes {
         for (Chat iChat : server.getAllChats()) {
             for (Member iMeber : iChat.getMembers()) {
                 if (iMeber.getConnectionId().equals(emisorId)) {
-                    MSG chatInstance = sendChatInstance(iChat);
-                    updatedState.addMsg(chatInstance);
+                    MSG msgChat = sendChatInstance(iChat);
+                    updatedState.addMsg(msgChat);
                 }
             }
         }
