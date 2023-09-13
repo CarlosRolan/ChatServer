@@ -1,5 +1,5 @@
 import api.RequestHandler;
-import controller.ClientChannel;
+import controller.ClientCon;
 import controller.Server;
 
 public class Main {
@@ -9,7 +9,7 @@ public class Main {
 	public static void main(String[] args) {
 		// Main Thread listens and registers connections
 		RequestHandler.newRequest("simpleMethod");
-		ClientChannel cc;
+		ClientCon cc;
 		while (true) {
 			cc = server.initChannel(server.listenConnections());
 			cc.start();

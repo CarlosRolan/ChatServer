@@ -7,16 +7,16 @@ import java.net.SocketException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import com.api.Codes;
 import com.chat.Chat;
 import com.chat.Member;
-import com.comunication.ApiCodes;
-import com.comunication.Connection;
-import com.comunication.MSG;
-import com.comunication.PKG;
+import com.controller.Connection;
+import com.data.MSG;
+import com.data.PKG;
 
 import controller.Server;
 
-public class RequestHandler implements ApiCodes {
+public class RequestHandler implements Codes {
 
     private Server server = Server.getInstance();
 
@@ -264,7 +264,7 @@ public class RequestHandler implements ApiCodes {
             respond.setAction(REQ_INIT_CON);
             respond.setEmisor(con.getConId());
             respond.setReceptor(con.getNick());
-            respond.setParameters(con.getChatsRef());
+            //respond.setParameters(con.getChatsRef());
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
             LocalDateTime now = LocalDateTime.now();
             respond.setBody(dtf.format(now));

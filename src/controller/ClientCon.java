@@ -8,22 +8,22 @@ import java.util.List;
 
 import com.chat.Chat;
 import com.chat.Member;
-import com.comunication.Connection;
-import com.comunication.MSG;
-import com.comunication.MSG.Type;
-import com.comunication.handlers.IMSGHandler;
-import com.comunication.handlers.IPKGHandler;
+import com.controller.Connection;
+import com.controller.handlers.IMSGHandler;
+import com.controller.handlers.IPKGHandler;
+import com.data.MSG;
+import com.data.MSG.Type;
 
 import controller.log.ClientLog;
 
-public class ClientChannel extends Connection {
+public class ClientCon extends Connection {
 
     private ClientLog cLog;
 
     private boolean recievePresentation() {
         MSG presentation = null;
         try {
-            presentation = readMessage();
+            presentation = (MSG) read();
         } catch (ClassNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -73,7 +73,7 @@ public class ClientChannel extends Connection {
         return chatsParticipated;
     }
 
-    public ClientChannel(Socket socket, IMSGHandler msgHandler, IPKGHandler pckgHandler) {
+    public ClientCon(Socket socket, IMSGHandler msgHandler, IPKGHandler pckgHandler) {
         super(socket, msgHandler, pckgHandler);
     }
 

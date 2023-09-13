@@ -7,18 +7,19 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.api.Codes;
 import com.chat.Chat;
+import com.chat.ChatBuilder;
 import com.chat.Member;
-import com.comunication.ApiCodes;
-import com.comunication.Connection;
-import com.comunication.MSG;
-import com.comunication.PKG;
-import com.comunication.handlers.IMSGHandler;
-import com.comunication.handlers.IPKGHandler;
+import com.controller.Connection;
+import com.controller.handlers.IMSGHandler;
+import com.controller.handlers.IPKGHandler;
+import com.data.MSG;
+import com.data.PKG;
 
 import api.RequestHandler;
 
-public class Server implements Enviroment, ApiCodes {
+public class Server implements Enviroment, Codes {
 
 	private static Server instance;
 
@@ -31,8 +32,8 @@ public class Server implements Enviroment, ApiCodes {
 
 	public Object respond = null;
 
-	public ClientChannel initChannel(Socket socket) {
-		return new ClientChannel(socket, pMSG_HANDLER, pPCKG_HANDLER);
+	public ClientCon initChannel(Socket socket) {
+		return new ClientCon(socket, pMSG_HANDLER, pPCKG_HANDLER);
 	}
 
 	private List<Connection> allOnlineCon = new ArrayList<>();
@@ -46,7 +47,7 @@ public class Server implements Enviroment, ApiCodes {
 
 			switch (error.getAction()) {
 				default:
-					System.out.println(WARN_UNHANDLED_MSG_ERROR);
+					System.out.println(WARN_UNREGISTERED_PKG_MIXED_ACTION);
 					break;
 			}
 
@@ -69,7 +70,7 @@ public class Server implements Enviroment, ApiCodes {
 					break;
 
 				default:
-					System.err.println(WARN_UNHANDLED_MSG_MESSAGE);
+					System.err.println(WARN_UNREGISTERED_MSG_MESSAGE_ACTION);
 					break;
 			}
 
@@ -107,7 +108,7 @@ public class Server implements Enviroment, ApiCodes {
 					break;
 
 				case REQ_CREATE_CHAT:
-					Chat newChat = Chat.createChatAsAdmin(msg);
+					Chat newChat = ChatBuilder.createChatAsAdmin(msg);
 					registerChat(newChat);
 					respond = new RequestHandler().sendChatInstance(newChat);
 					break;
@@ -125,7 +126,7 @@ public class Server implements Enviroment, ApiCodes {
 					Chat updatedChat = getChatById(msg.getEmisor());
 					Connection selectedCon = getConnectionById(msg.getReceptor());
 					if (selectedCon != null) {
-						Member newMember = Member.newMember(selectedCon, msg.getParameter(0));
+						Member newMember = ChatBuilder.newMember(selectedCon, msg.getParameter(0));
 						updatedChat.addMember(newMember);
 						respond = new RequestHandler().sendChatInstance(updatedChat);
 						try {
@@ -144,10 +145,16 @@ public class Server implements Enviroment, ApiCodes {
 					break;
 
 				default:
-					System.err.println(WARN_UNHANDLED_MSG_REQUEST);
+					System.err.println(WARN_UNREGISTERED_MSG_REQUEST_ACTION);
 					break;
 			}
 
+		}
+
+		@Override
+		public void unHandledMSG(MSG arg0) {
+			// TODO Auto-generated method stub
+			throw new UnsupportedOperationException("Unimplemented method 'unHandledMSG'");
 		}
 	};
 	public final IPKGHandler pPCKG_HANDLER = new IPKGHandler() {
@@ -160,6 +167,12 @@ public class Server implements Enviroment, ApiCodes {
 		@Override
 		public void handleMixed(PKG arg0) {
 			respond = null;
+		}
+
+		@Override
+		public void unHandledPKG(PKG arg0) {
+			// TODO Auto-generated method stub
+			throw new UnsupportedOperationException("Unimplemented method 'unHandledPKG'");
 		}
 
 	};
