@@ -80,6 +80,13 @@ public class RequestHandler implements Codes {
 
     }
 
+    /**
+     * 
+     * @param requesterId   msg.getEmisor()
+     * @param candidateId   msg.getReceptor()
+     * @param requesterNick msg.getBody()
+     * @return MSG
+     */
     public MSG askForSingle(String requesterId, String candidateId, String requesterNick) {
         MSG respond = null;
         MSG toCandidate = null;
@@ -123,6 +130,23 @@ public class RequestHandler implements Codes {
         return respond;
     }
 
+    /**
+     * Also send a MSG to the requester as
+     * MSG[REQUEST]
+     * action = REQ_START_SINGLE
+     * emisor = requesterId
+     * receptor = requestedId
+     * parameter[0] = requestedNick
+     * @param requesterId   msg.getReceptor()
+     * @param requestedId   msg.getEmisor()
+     * @param requestedNick msg.getBody()
+     * @return
+     * MSG[REQUEST]
+     * action = REQ_START_SINGLE
+     * emisor = requestedId
+     * receptor = requestedId
+     * parameter[0] = requester.getNick
+     */
     public MSG allowSingleChat(String requesterId, String requestedId, String requestedNick) {
         MSG respond = new MSG(MSG.Type.REQUEST);
         MSG toRequester = new MSG(MSG.Type.REQUEST);
@@ -153,6 +177,13 @@ public class RequestHandler implements Codes {
         return respond;
     }
 
+    /**
+     * 
+     * @param emisorId   msg.getEmisor
+     * @param emisorNick msg.getParameter(0)
+     * @param receptorId msg.getReceptor()
+     * @param text       msg.getBody()
+     */
     public void sendSingleMsg(String emisorId, String emisorNick, String receptorId, String text) {
 
         Connection receptor = server.getConnectionById(receptorId);
@@ -218,6 +249,13 @@ public class RequestHandler implements Codes {
         }
     }
 
+    /**
+     * 
+     * @return
+     *         MSG[REQUEST]
+     *         action = REQ_SHOW_ALL_CHAT
+     *         parameters = all active chats in the server
+     */
     public MSG showAllChats() {
         MSG respond = new MSG(MSG.Type.REQUEST);
         String[] chats = new String[server.getNumberOfChats()];
@@ -232,9 +270,7 @@ public class RequestHandler implements Codes {
         } else {
             respond.setParameter(0, "You do not have any chat yet");
         }
-
         return respond;
-
     }
 
     // TODO make difeerent when created new chat and wehn added
@@ -256,6 +292,19 @@ public class RequestHandler implements Codes {
         return respond;
     }
 
+    /**
+     * 
+     * @param con the connection to send the info
+     * @return
+     *         MSG[REQUEST],
+     *         action = REQ_INIT_CON,
+     *         emisor = connection id,
+     *         receptor = connection nick,
+     *         body = date-time
+     *         OR
+     *         MSG[ERROR],
+     *         action = ERROR_CLIENT_NOT_FOUND
+     */
     public MSG sendConInstance(Connection con) {
         MSG respond = null;
 
@@ -264,7 +313,7 @@ public class RequestHandler implements Codes {
             respond.setAction(REQ_INIT_CON);
             respond.setEmisor(con.getConId());
             respond.setReceptor(con.getNick());
-            //respond.setParameters(con.getChatsRef());
+            // respond.setParameters(con.getChatsRef());
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
             LocalDateTime now = LocalDateTime.now();
             respond.setBody(dtf.format(now));
@@ -273,10 +322,14 @@ public class RequestHandler implements Codes {
             respond = new MSG(MSG.Type.ERROR);
             respond.setAction(ERROR_CLIENT_NOT_FOUND);
         }
-
         return respond;
     }
 
+    /**
+     * 
+     * @param emisorId
+     * @return
+     */
     public PKG sendStateUpdate(String emisorId) {
         PKG updatedState = new PKG(PKG.Type.COLLECTION);
         updatedState.setName(COLLECTION_UPDATE);
@@ -300,5 +353,6 @@ public class RequestHandler implements Codes {
         return updatedState;
 
     }
+
 
 }
