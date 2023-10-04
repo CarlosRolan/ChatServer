@@ -20,9 +20,9 @@ import api.RequestHandler;
 
 public class Server implements Enviroment, Codes {
 
-	private static Server instance;
+	private volatile static Server instance;
 
-	public static Server getInstance() {
+	synchronized public static Server getInstance() {
 		if (instance == null) {
 			instance = new Server();
 		}
@@ -208,8 +208,7 @@ public class Server implements Enviroment, Codes {
 
 				case REQ_CREATE_CHAT:
 					Chat newChat = Chat.createChat(msg);
-					registerChat(newChat);
-					respond = new RequestHandler().sendChatInstance(newChat);
+					registerChat(newChat);				
 					break;
 
 				case REQ_CHAT:

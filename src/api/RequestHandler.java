@@ -18,8 +18,6 @@ import controller.Server;
 
 public class RequestHandler implements Codes {
 
-    private Server server = Server.getInstance();
-
     public static void newRequest(String methodName) {
         try {
             Class c = RequestHandler.class;
@@ -45,27 +43,16 @@ public class RequestHandler implements Codes {
     }
 
     public MSG showOnlineUsers(String emisorId) {
-        String[] allOnline = new String[server.getNumberOfOnlineUsers() - 1];
+        String[] allOnline = new String[Server.getInstance().getNumberOfOnlineUsers() - 1];
         int i = 0;
 
-        for (Connection iter : server.getAllConnections()) {
-            if (!iter.getConId().equals(emisorId)) {
-                System.out.println(iter.getNick());
-                allOnline[i] = "[" + iter.getConId() + "]-" + iter.getNick();
-                System.out.println(allOnline[i]);
-                i++;
-            }
+        for (Connection iter : Server.getInstance().getAllConnections()) {
+            allOnline[i] = "[" + iter.getConId() + "]-" + iter.getNick();
+            i++;
         }
 
         MSG respond = new MSG(MSG.Type.REQUEST);
-
         respond.setAction(REQ_SHOW_ALL_CON);
-
-        if (allOnline.length > 0) {
-            respond.setParameters(allOnline);
-        } else if (allOnline.length == 0) {
-            respond.setParameter(0, "You are the only user ONLINE");
-        }
 
         return respond;
     }
@@ -92,7 +79,7 @@ public class RequestHandler implements Codes {
         MSG toCandidate = null;
 
         System.out.println("ID CANDIDATE [" + candidateId + "]");
-        Connection candidate = server.getConnectionById(candidateId);
+        Connection candidate = Server.getInstance().getConnectionById(candidateId);
 
         if (candidateId.equals(requesterId)) {
             respond = new MSG(MSG.Type.ERROR);
@@ -137,22 +124,23 @@ public class RequestHandler implements Codes {
      * emisor = requesterId
      * receptor = requestedId
      * parameter[0] = requestedNick
+     * 
      * @param requesterId   msg.getReceptor()
      * @param requestedId   msg.getEmisor()
      * @param requestedNick msg.getBody()
      * @return
-     * MSG[REQUEST]
-     * action = REQ_START_SINGLE
-     * emisor = requestedId
-     * receptor = requestedId
-     * parameter[0] = requester.getNick
+     *         MSG[REQUEST]
+     *         action = REQ_START_SINGLE
+     *         emisor = requestedId
+     *         receptor = requestedId
+     *         parameter[0] = requester.getNick
      */
     public MSG allowSingleChat(String requesterId, String requestedId, String requestedNick) {
         MSG respond = new MSG(MSG.Type.REQUEST);
         MSG toRequester = new MSG(MSG.Type.REQUEST);
 
         // the requester is waiting for the respond at the moment
-        Connection requester = server.getConnectionById(requesterId);
+        Connection requester = Server.getInstance().getConnectionById(requesterId);
 
         toRequester.setAction(REQ_START_SINGLE);
         toRequester.setEmisor(requesterId);
@@ -186,7 +174,7 @@ public class RequestHandler implements Codes {
      */
     public void sendSingleMsg(String emisorId, String emisorNick, String receptorId, String text) {
 
-        Connection receptor = server.getConnectionById(receptorId);
+        Connection receptor = Server.getInstance().getConnectionById(receptorId);
 
         MSG directMSG = new MSG(MSG.Type.MESSAGE);
 
@@ -230,7 +218,7 @@ public class RequestHandler implements Codes {
     }
 
     public void exitSigle(String emisorId, String receptorId) {
-        Connection receptor = server.getConnectionById(receptorId);
+        Connection receptor = Server.getInstance().getConnectionById(receptorId);
 
         MSG exitSingle = new MSG(MSG.Type.REQUEST);
 
@@ -254,16 +242,16 @@ public class RequestHandler implements Codes {
      * @return
      *         MSG[REQUEST]
      *         action = REQ_SHOW_ALL_CHAT
-     *         parameters = all active chats in the server
+     *         parameters = all active chats in the Server.getInstance()
      */
     public MSG showAllChats() {
         MSG respond = new MSG(MSG.Type.REQUEST);
-        String[] chats = new String[server.getNumberOfChats()];
+        String[] chats = new String[Server.getInstance().getNumberOfChats()];
         respond.setAction(REQ_SHOW_ALL_CHAT);
         int i = 0;
 
         if (chats.length >= 1) {
-            for (Chat iter : server.getAllChats()) {
+            for (Chat iter : Server.getInstance().getAllChats()) {
                 chats[i] = "[" + iter.getChatId() + "]" + iter.getTitle() + "-" + iter.getDescription();
                 respond.setParameter(i, chats[i]);
             }
@@ -273,10 +261,9 @@ public class RequestHandler implements Codes {
         return respond;
     }
 
-    // TODO make difeerent when created new chat and wehn added
-    // To update or send the new chatCreated
     public MSG sendChatInstance(Chat chat) {
         MSG respond = null;
+
         if (chat != null) {
             respond = new MSG(MSG.Type.REQUEST);
             respond.setAction(REQ_INIT_CHAT);
@@ -284,6 +271,7 @@ public class RequestHandler implements Codes {
             respond.setReceptor(chat.getTitle());
             respond.setBody(chat.getDescription());
             respond.setParameters(chat.getMembersRef());
+
         } else {
             respond = new MSG(MSG.Type.ERROR);
             respond.setAction(ERROR_CHAT_NOT_FOUND);
@@ -334,25 +322,22 @@ public class RequestHandler implements Codes {
         PKG updatedState = new PKG(PKG.Type.COLLECTION);
         updatedState.setName(COLLECTION_UPDATE);
 
-        for (Connection iCon : server.getAllConnections()) {
+        for (Connection iCon : Server.getInstance().getAllConnections()) {
             if (!iCon.getConId().equals(emisorId)) {
                 MSG msgCon = sendConInstance(iCon);
                 updatedState.addMsg(msgCon);
             }
         }
 
-        for (Chat iChat : server.getAllChats()) {
-            for (Member iMeber : iChat.getMembers()) {
-                if (iMeber.getConnectionId().equals(emisorId)) {
-                    MSG msgChat = sendChatInstance(iChat);
-                    updatedState.addMsg(msgChat);
-                }
+        for (Chat iChat : Server.getInstance().getAllChats()) {
+            if (iChat.isMemberInChat(emisorId)) {
+                MSG msgChat = sendChatInstance(iChat);
+                updatedState.addMsg(msgChat);
             }
         }
 
         return updatedState;
 
     }
-
 
 }
