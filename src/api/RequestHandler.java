@@ -52,6 +52,7 @@ public class RequestHandler implements Codes {
         }
 
         MSG respond = new MSG(MSG.Type.REQUEST);
+        respond.setParameters(allOnline);
         respond.setAction(REQ_SHOW_ALL_CON);
 
         return respond;
@@ -95,10 +96,10 @@ public class RequestHandler implements Codes {
             try {
                 candidate.write(toCandidate);
             } catch (SocketException e) {
-                // TODO Auto-generated catch block
+                System.err.println("SocketException" + toCandidate.toString());
                 e.printStackTrace();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
+                System.err.println("IOException" + toCandidate.toString());
                 e.printStackTrace();
             }
 
@@ -150,10 +151,10 @@ public class RequestHandler implements Codes {
         try {
             requester.write(toRequester);
         } catch (SocketException e) {
-            // TODO Auto-generated catch block
+            System.err.println("SocketException " + toRequester.toString());
             e.printStackTrace();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
+            System.err.println("IOException " + toRequester.toString());
             e.printStackTrace();
         }
 
@@ -187,10 +188,10 @@ public class RequestHandler implements Codes {
         try {
             receptor.write(directMSG);
         } catch (SocketException e) {
-            // TODO Auto-generated catch block
+            System.err.println("SocketException \n" + directMSG.toString());
             e.printStackTrace();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
+            System.err.println("IOException \n" + directMSG.toString());
             e.printStackTrace();
         }
     }
@@ -230,10 +231,10 @@ public class RequestHandler implements Codes {
         try {
             receptor.write(exitSingle);
         } catch (SocketException e) {
-            // TODO Auto-generated catch block
+            System.err.println("SocketException \n" + exitSingle.toString());
             e.printStackTrace();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
+            System.err.println("IOException \n" + exitSingle.toString());
             e.printStackTrace();
         }
     }

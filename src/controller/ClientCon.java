@@ -25,10 +25,10 @@ public class ClientCon extends Connection {
         try {
             presentation = (MSG) read();
         } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
+            System.err.println("ClassNotFoundException" + " reading presentation");
             e.printStackTrace();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
+            System.err.println("IOException" + " reading presentation");
             e.printStackTrace();
         }
 
@@ -52,10 +52,10 @@ public class ClientCon extends Connection {
         try {
             write(comfirmation);
         } catch (SocketException e) {
-            // TODO Auto-generated catch block
+            System.err.println("SocketException" + comfirmation.toString());
             e.printStackTrace();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
+            System.err.println("IOException" + comfirmation.toString());
             e.printStackTrace();
         }
 
@@ -76,7 +76,6 @@ public class ClientCon extends Connection {
     public ClientCon(Socket socket, IMSGHandler msgHandler, IPKGHandler pckgHandler) {
         super(socket, msgHandler, pckgHandler);
     }
-
 
     @Override
     public void run() {

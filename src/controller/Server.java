@@ -161,7 +161,7 @@ public class Server implements Enviroment, Codes {
 					 * msgOut.setReceptor(chatId);
 					 * msgOut.setBody(line);
 					 */
-				
+
 					Chat chat = getChatById(msg.getReceptor());
 					new RequestHandler().sendMsgToChat(chat, msg.getEmisor(), msg.getBody());
 					break;
@@ -241,10 +241,10 @@ public class Server implements Enviroment, Codes {
 						try {
 							selectedCon.write(respond);
 						} catch (SocketException e) {
-							// TODO Auto-generated catch block
+							System.err.println("SocketException" + REQ_ADD_MEMBER + respond.toString());
 							e.printStackTrace();
 						} catch (IOException e) {
-							// TODO Auto-generated catch block
+							System.err.println("IOException" + REQ_ADD_MEMBER + respond.toString());
 							e.printStackTrace();
 						}
 					} else {
