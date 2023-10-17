@@ -32,8 +32,8 @@ public class Server implements Enviroment, Codes {
 	// can be MSG or PKG
 	public Object respond = null;
 
-	private List<Connection> allOnlineCon = new ArrayList<>();
-	private List<Chat> allChats = new ArrayList<>();
+	private final List<Connection> allOnlineCon = new ArrayList<>();
+	private final List<Chat> allChats = new ArrayList<>();
 
 	private ServerSocket serverSocket = null;
 
@@ -131,7 +131,7 @@ public class Server implements Enviroment, Codes {
 
 			switch (error.getAction()) {
 				default:
-					System.out.println(WARN_UNREGISTERED_PKG_MIXED_ACTION);
+					System.out.println(WARN_UREGISTERED_MSG_ERROR_ACTION);
 					break;
 			}
 		}
@@ -139,6 +139,7 @@ public class Server implements Enviroment, Codes {
 		@Override
 		public void handleMessage(MSG msg) {
 			respond = null;
+			System.out.println(msg.toString());
 
 			switch (msg.getAction()) {
 
@@ -152,9 +153,17 @@ public class Server implements Enviroment, Codes {
 					break;
 
 				case MSG_TO_CHAT:
-					// chatId = msg.getReceptor()
+					System.out.println(msg.toString());
+
+					/*
+					 * msgOut.setAction(MSG_TO_CHAT);
+					 * msgOut.setEmisor(emisorId);
+					 * msgOut.setReceptor(chatId);
+					 * msgOut.setBody(line);
+					 */
+				
 					Chat chat = getChatById(msg.getReceptor());
-					new RequestHandler().sendMsgToChat(chat, msg.getEmisor(), msg.getParameter(0), msg.getBody());
+					new RequestHandler().sendMsgToChat(chat, msg.getEmisor(), msg.getBody());
 					break;
 
 				default:
@@ -208,7 +217,7 @@ public class Server implements Enviroment, Codes {
 
 				case REQ_CREATE_CHAT:
 					Chat newChat = Chat.createChat(msg);
-					registerChat(newChat);				
+					registerChat(newChat);
 					break;
 
 				case REQ_CHAT:
@@ -245,14 +254,13 @@ public class Server implements Enviroment, Codes {
 					break;
 
 				default:
-					throw new UnsupportedOperationException("Unhandled MSG ACTION for TYPE" + msg.MSG_TYPE);
+					System.err.println(WARN_UNREGISTERED_MSG_MESSAGE_ACTION);
 			}
 		}
 
 		@Override
 		public void unHandledMSG(MSG arg0) {
-			// TODO Auto-generated method stub
-			throw new UnsupportedOperationException("Unhandled MSG TYPE");
+			throw new UnsupportedOperationException("Unimplemented MSG TYPE");
 		}
 	};
 	// PKG
@@ -261,6 +269,7 @@ public class Server implements Enviroment, Codes {
 		@Override
 		public void handleCollection(PKG arg0) {
 			respond = null;
+
 		}
 
 		@Override

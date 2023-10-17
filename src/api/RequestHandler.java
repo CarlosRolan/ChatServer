@@ -178,7 +178,7 @@ public class RequestHandler implements Codes {
 
         MSG directMSG = new MSG(MSG.Type.MESSAGE);
 
-        directMSG.setAction(MSG_TO_SINGLE);
+        directMSG.setAction(MSG_FROM_SINGLE);
         directMSG.setEmisor(emisorId);
         directMSG.setReceptor(receptorId);
         directMSG.setParameter(0, emisorNick);
@@ -195,24 +195,25 @@ public class RequestHandler implements Codes {
         }
     }
 
-    public void sendMsgToChat(Chat selectedChat, String emisorId, String emisorNick, String text) {
+    public void sendMsgToChat(Chat currentChat, String emisorId, String line) {
         MSG toChat = new MSG(MSG.Type.MESSAGE);
 
-        toChat.setAction(MSG_TO_CHAT);
-        toChat.setEmisor(emisorId);
-        toChat.setParameter(0, emisorNick);
-        toChat.setBody(text);
+        toChat.setAction(MSG_FROM_CHAT);
+        toChat.setEmisor(currentChat.getChatId());
+        toChat.setReceptor(currentChat.getTitle());
+        toChat.setParameter(0, currentChat.getDescription());
+        toChat.setBody(line);
 
-        for (Member iMember : selectedChat.getMembers()) {
-            Connection memberCon = Server.getInstance().getConnectionById(iMember.getConnectionId());
-            try {
-                memberCon.write(toChat);
-            } catch (SocketException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+        for (Member iMember : currentChat.getMembers()) {
+            if (!iMember.getConnectionId().equals(emisorId)) {
+                Connection memberCon = Server.getInstance().getConnectionById(iMember.getConnectionId());
+                try {
+                    memberCon.write(toChat);
+                } catch (SocketException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -323,10 +324,8 @@ public class RequestHandler implements Codes {
         updatedState.setName(COLLECTION_UPDATE);
 
         for (Connection iCon : Server.getInstance().getAllConnections()) {
-            if (!iCon.getConId().equals(emisorId)) {
-                MSG msgCon = sendConInstance(iCon);
-                updatedState.addMsg(msgCon);
-            }
+            MSG msgCon = sendConInstance(iCon);
+            updatedState.addMsg(msgCon);
         }
 
         for (Chat iChat : Server.getInstance().getAllChats()) {
