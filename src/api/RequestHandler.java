@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.SocketException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 import com.api.Codes;
 import com.chat.Chat;
@@ -209,6 +207,10 @@ public class RequestHandler implements Codes {
             if (!iMember.getConnectionId().equals(emisorId)) {
                 Connection memberCon = Server.getInstance().getConnectionById(iMember.getConnectionId());
                 try {
+                    if (currentChat.isMemberInChat(iMember)) {
+                        MSG msgChatInfo = sendChatInstance(currentChat);
+                        memberCon.write(msgChatInfo);
+                    }
                     memberCon.write(toChat);
                 } catch (SocketException e) {
                     e.printStackTrace();
@@ -263,57 +265,7 @@ public class RequestHandler implements Codes {
         return respond;
     }
 
-    public MSG sendChatInstance(Chat chat) {
-        MSG respond = null;
-
-        if (chat != null) {
-            respond = new MSG(MSG.Type.REQUEST);
-            respond.setAction(REQ_INIT_CHAT);
-            respond.setEmisor(chat.getChatId());
-            respond.setReceptor(chat.getTitle());
-            respond.setBody(chat.getDescription());
-            respond.setParameters(chat.getMembersRef());
-
-        } else {
-            respond = new MSG(MSG.Type.ERROR);
-            respond.setAction(ERROR_CHAT_NOT_FOUND);
-        }
-
-        return respond;
-    }
-
-    /**
-     * 
-     * @param con the connection to send the info
-     * @return
-     *         MSG[REQUEST],
-     *         action = REQ_INIT_CON,
-     *         emisor = connection id,
-     *         receptor = connection nick,
-     *         body = date-time
-     *         OR
-     *         MSG[ERROR],
-     *         action = ERROR_CLIENT_NOT_FOUND
-     */
-    public MSG sendConInstance(Connection con) {
-        MSG respond = null;
-
-        if (con != null) {
-            respond = new MSG(MSG.Type.REQUEST);
-            respond.setAction(REQ_INIT_CON);
-            respond.setEmisor(con.getConId());
-            respond.setReceptor(con.getNick());
-            // respond.setParameters(con.getChatsRef());
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
-            LocalDateTime now = LocalDateTime.now();
-            respond.setBody(dtf.format(now));
-
-        } else {
-            respond = new MSG(MSG.Type.ERROR);
-            respond.setAction(ERROR_CLIENT_NOT_FOUND);
-        }
-        return respond;
-    }
+ 
 
     /**
      * 

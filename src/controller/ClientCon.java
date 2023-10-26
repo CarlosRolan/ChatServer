@@ -26,15 +26,15 @@ public class ClientCon extends Connection {
             presentation = (MSG) read();
         } catch (ClassNotFoundException e) {
             System.err.println("ClassNotFoundException" + " reading presentation");
-            e.printStackTrace();
         } catch (IOException e) {
             System.err.println("IOException" + " reading presentation");
-            e.printStackTrace();
         }
 
         setConId(Thread.currentThread().getId());
         setNick(presentation.getEmisor());
+
         cLog = new ClientLog(getConId(), getNick());
+
         if (presentation.getAction().equals(REQ_PRESENT)) {
             System.out.println("[" + presentation.getEmisor() + "] IS ACCEPTED");
             return true;
@@ -44,9 +44,11 @@ public class ClientCon extends Connection {
     }
 
     private void sendComfirmation() {
+
         MSG comfirmation = new MSG(Type.REQUEST);
         comfirmation.setAction(INFO_PRESENTATION_SUCCES);
         comfirmation.setReceptor(getConId());
+
         System.out.println("SENDING COMFIRMATION TO [" + comfirmation.getReceptor() + "]");
 
         try {
@@ -61,6 +63,10 @@ public class ClientCon extends Connection {
 
     }
 
+    /**
+     * 
+     * @return
+     */
     public List<Chat> getChats() {
         List<Chat> chatsParticipated = new ArrayList<>();
         for (Chat chat : Server.getInstance().getAllChats()) {
@@ -73,6 +79,13 @@ public class ClientCon extends Connection {
         return chatsParticipated;
     }
 
+    /* CONSTRUCTORs */
+    /**
+     * 
+     * @param socket
+     * @param msgHandler
+     * @param pckgHandler
+     */
     public ClientCon(Socket socket, IMSGHandler msgHandler, IPKGHandler pckgHandler) {
         super(socket, msgHandler, pckgHandler);
     }
@@ -91,9 +104,11 @@ public class ClientCon extends Connection {
 
                 }
             } catch (Exception e) {
-                e.printStackTrace();
-                System.out.println(e.getClass());
-                System.out.println("IOException");
+                /*
+                 * e.printStackTrace();
+                 * System.out.println(e.getClass());
+                 * System.out.println("IOException");
+                 */
                 System.err.println("[" + getNick() + "] HAS LEFT");
                 System.out.println(
                         INFO_CONNECTION_CLOSED + " [" + getNick() + "]");

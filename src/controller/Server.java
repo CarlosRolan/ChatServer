@@ -30,10 +30,10 @@ public class Server implements Enviroment, Codes {
 	}
 
 	// can be MSG or PKG
-	public Object respond = null;
+	public volatile Object respond = null;
 
-	private final List<Connection> allOnlineCon = new ArrayList<>();
-	private final List<Chat> allChats = new ArrayList<>();
+	private volatile List<Connection> allOnlineCon = new ArrayList<>();
+	private volatile List<Chat> allChats = new ArrayList<>();
 
 	private ServerSocket serverSocket = null;
 
@@ -66,6 +66,12 @@ public class Server implements Enviroment, Codes {
 
 	public List<Chat> getAllChats() {
 		return allChats;
+	}
+
+	public void updateChat(Chat updated) {
+		Chat oldChat = getChatById(updated.getChatId());
+		int index = getAllChats().indexOf(oldChat);
+		getAllChats().set(index, updated);
 	}
 
 	public void registerConnection(Connection c) {
@@ -178,6 +184,12 @@ public class Server implements Enviroment, Codes {
 			respond = null;
 
 			switch (msg.getAction()) {
+
+				case REQ_INIT_CHAT:
+					// Chat has been updated
+					Chat updated = Chat.instanceChat(msg);
+					updateChat(updated);
+					break;
 
 				case REQ_SHOW_ALL_CON:
 					// String emisorId = msg.getEmisor();
