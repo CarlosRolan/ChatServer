@@ -1,8 +1,8 @@
-package controller;
+package com.controller;
 
-import chats.Chat;
-import connection.ClientChannel;
-import connection.ConStatusCodes;
+import com.chats.Chat;
+import com.connection.ClientChannel;
+import com.connection.ConStatusCodes;
 
 public class Request implements ConStatusCodes {
 
@@ -76,6 +76,10 @@ public class Request implements ConStatusCodes {
 
     public void sendDirectMessage(String emisorNick, ClientChannel receptor, String textMsg) {
         receptor.writeClientMessage(new Message(TO_CHAT, emisorNick, receptor.getNick(), textMsg));
+    }
+
+    public void getOnlineUsers(){
+
     }
 
 }

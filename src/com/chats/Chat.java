@@ -1,9 +1,9 @@
-package chats;
+package com.chats;
 
 import java.util.ArrayList;
 
-import connection.ClientChannel;
-import controller.Message;
+import com.connection.ClientChannel;
+import com.controller.Message;
 
 public class Chat {
 

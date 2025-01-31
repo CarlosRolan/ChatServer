@@ -1,14 +1,14 @@
-package connection;
+package com.connection;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-import chats.Chat;
-import controller.Server;
-import controller.Message;
-import controller.Request;
+import com.chats.Chat;
+import com.controller.Message;
+import com.controller.Request;
+import com.controller.Server;
 
 public class ClientChannel extends Thread implements ConStatusCodes {
 
@@ -98,10 +98,12 @@ public class ClientChannel extends Thread implements ConStatusCodes {
         try {
             return (Message) ois.readObject();
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            System.out.println("Class not found on method readClientMesssage");
+            // e.printStackTrace();
             return null;
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("IOEXception ");
+            // e.printStackTrace();
             return null;
         }
     }
@@ -139,7 +141,7 @@ public class ClientChannel extends Thread implements ConStatusCodes {
                 break;
 
             case Request.TO_CHAT:
-            System.out.println(msg.toString());
+                System.out.println(msg.toString());
                 ClientChannel receiver = Server.getInstance().getOnlineUserByNick(msg.getReceptor());
                 new Request().sendDirectMessage(nick, receiver, ASKING_PERMISSION);
                 break;
@@ -150,13 +152,23 @@ public class ClientChannel extends Thread implements ConStatusCodes {
     public void run() {
         while (true) {
             Message msg = readClientMessage();
-            System.out.println(msg.toString());
-            try {
-                handleRequest(msg);
-            } catch (NullPointerException e) {
+            if (msg != null) {
+                try {
+                    System.out.println(msg.toString());
+                    handleRequest(msg);
+                } catch (NullPointerException e) {
+                    System.out.println(
+                            CONNECTION_CLOSED + " [" + nick + "]");
+                    Server.getInstance().deleteConnection(this);
+                    break;
+                }
+            } else {
+                System.out.println("Listening Loop closed for connection with " + this.getNick());
                 System.out.println(
                         CONNECTION_CLOSED + " [" + nick + "]");
                 Server.getInstance().deleteConnection(this);
+                // El MSG es nulo lo que significa que no se ha podido recibir o se ha perdido
+                // la conecxion
                 break;
             }
         }

@@ -1,8 +1,8 @@
-package chats;
+package com.chats;
 
 import java.util.ArrayList;
 
-import connection.ClientChannel;
+import com.connection.ClientChannel;
 
 public class ChatGroup {
 

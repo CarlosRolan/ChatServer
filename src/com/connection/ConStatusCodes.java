@@ -1,4 +1,4 @@
-package connection;
+package com.connection;
 
 public interface ConStatusCodes {
 

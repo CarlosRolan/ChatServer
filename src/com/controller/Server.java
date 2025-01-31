@@ -1,12 +1,12 @@
-package controller;
+package com.controller;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
-import chats.Chat;
-import connection.ClientChannel;
+import com.chats.Chat;
+import com.connection.ClientChannel;
 
 
 public class Server implements Enviroment {
