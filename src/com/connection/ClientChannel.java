@@ -6,7 +6,8 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 import com.chats.Chat;
-import com.controller.Message;
+import com.comunication.*;
+
 import com.controller.Request;
 import com.controller.Server;
 
@@ -71,7 +72,7 @@ public class ClientChannel extends Thread implements ConStatusCodes {
     private boolean presenting() {
         Message presentation = readClientMessage();
         System.out.println(presentation.requestInfo());
-        if (presentation.getAction().equals(Request.PRESENTATION)) {
+        if (presentation.getAction().equals(RequestAPI.PRESENTATION)) {
             nick = presentation.getEmisor();
             return true;
         } else {

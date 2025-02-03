@@ -2,9 +2,10 @@ package com.controller;
 
 import com.chats.Chat;
 import com.connection.ClientChannel;
-import com.connection.ConStatusCodes;
+import com.comunication.*;
 
-public class Request implements ConStatusCodes {
+
+public class Request implements ConStatusCodes, RequestAPI {
 
     public static final String PRESENTATION = "PRESENTATION";
     public static final String SHOW_ALL_ONLINE = "SHOW_ALL_ONLINE";
@@ -71,14 +72,14 @@ public class Request implements ConStatusCodes {
     }
 
     public void sendMsgToChat(Chat chat, ClientChannel sender, String textMsg) {
-        
+
     }
 
     public void sendDirectMessage(String emisorNick, ClientChannel receptor, String textMsg) {
         receptor.writeClientMessage(new Message(TO_CHAT, emisorNick, receptor.getNick(), textMsg));
     }
 
-    public void getOnlineUsers(){
+    public void getOnlineUsers() {
 
     }
 

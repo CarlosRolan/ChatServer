@@ -3,7 +3,7 @@ package com.chats;
 import java.util.ArrayList;
 
 import com.connection.ClientChannel;
-import com.controller.Message;
+import com.comunication.*;
 
 public class Chat {
 
